@@ -2,33 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tenno Mastery Matrix 2026</title>
+    <title>Tenno Mastery Matrix 2026: Completionist Edition</title>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; --relic: #f2c94c; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; --syndicate: #ff7b72; --sp: #f2c94c; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 900px; width: 100%; }
-        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px; background: #0d1117; cursor: pointer; }
+        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px; background: #0d1117; cursor: pointer; transition: 0.2s; }
+        .upload-zone:hover { border-color: var(--btn); background: #161b22; }
         .btn-roll { background: var(--btn); color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.2em; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .btn-roll:hover { background: #388bfd; transform: translateY(-2px); }
-        #result { background: var(--card); border: 1px solid #30363d; padding: 30px; border-radius: 15px; margin-top: 25px; display: none; border-left: 10px solid var(--frame); position: relative; }
+        #result { background: var(--card); border: 1px solid #30363d; padding: 30px; border-radius: 15px; margin-top: 25px; display: none; border-left: 10px solid var(--frame); position: relative; text-align: left; }
         .target { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #fff; letter-spacing: -1px; }
         .location { color: var(--accent); font-family: 'Courier New', monospace; font-size: 1.3em; margin-bottom: 20px; display: block; }
-        .priority-badge { position: absolute; top: 20px; right: 20px; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        .priority-badge { position: absolute; top: 20px; right: 20px; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; border: 1px solid; }
         #statusInfo { margin-top: 15px; font-size: 0.9em; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Tenno Mastery Matrix</h1>
+    <h1>Tenno Completionist Matrix 2026</h1>
     
     <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-        <p id="fileStatus">Click to Upload <strong>AlecaFrame JSON</strong></p>
+        <p id="fileStatus">Drop or Click to Upload <strong>AlecaFrame JSON</strong></p>
         <input type="file" id="fileInput" accept=".json" style="display:none">
-        <div id="statusInfo">Status: Offline (Using Random Defaults)</div>
+        <div id="statusInfo">Status: Awaiting Account Data...</div>
     </div>
 
-    <button class="btn-roll" onclick="generateObjective()">GENERATE NEXT GOAL</button>
+    <button class="btn-roll" onclick="generateObjective()">GENERATE COMPLETIONIST GOAL</button>
 
     <div id="result">
         <span id="pBadge" class="priority-badge">Priority</span>
@@ -40,73 +41,77 @@
 </div>
 
 <script>
-    // --- JAN 2026 PRIME RESURGENCE (Rotation 2) ---
-    // Priority: Middle (60)
-    const UNVAULTED_DB = [
-        { name: "NEKROS PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "HARROW PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "SARYN PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "VALKYR PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "IVARA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "OBERON PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "GARUDA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "KHORA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
-        { name: "TIGRIS PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
-        { name: "NIKANA PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
-        { name: "VENKA PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
-        { name: "SYBARIS PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" }
+    // --- DATABASE: 2026 FULL ROSTER ---
+    const ALL_FRAMES = [
+        "ASH", "ATLAS", "BANSHEE", "BARUUK", "CALIBAN", "CHROMA", "CITRINE", "CYTE-09", "DAGATH", "DANTE", "EMBER", "EQUINOX", "EXCALIBUR", "FROST", "GARA", "GARUDA", "GAUSS", "GRENDEL", "GYRE", "HARROW", "HILDRYN", "HYDROID", "INAROS", "IVARA", "JADE", "KHORA", "KOUMEI", "KULLERVO", "LAVOS", "LIMBO", "LOKI", "MAG", "MESA", "MIRAGE", "NEKROS", "NEZHA", "NIDUS", "NOVA", "NYX", "OBERON", "OCTAVIA", "ORAXIA", "PROTEA", "QORVEX", "REVENANT", "RHINO", "SARYN", "SEVAGOTH", "STYANAX", "TEMPLE", "TITANIA", "TRINITY", "URIEL", "VALKYR", "VAUBAN", "VOLT", "VORUNA", "WISP", "WUKONG", "XAKU", "YARELI", "ZEPHYR", "NOKKO"
     ];
 
-    // --- STATIC MASTERY DB (Non-Relic) ---
-    const STATIC_DB = [
-        // Frames (100)
-        { name: "DANTE", loc: "Armatus (Deimos)", cat: "Frame" },
-        { name: "QORVEX", loc: "Effervo (Deimos)", cat: "Frame" },
-        { name: "STYANAX", loc: "Kahl's Garrison", cat: "Frame" },
-        { name: "VORUNA", loc: "Lua Conjunction", cat: "Frame" },
-        { name: "CITRINE", loc: "Tyana Pass (Mars)", cat: "Frame" },
-        { name: "KULLERVO", loc: "Duviri (Kullervo's Hold)", cat: "Frame" },
-        { name: "DAGATH", loc: "Abyssal Zone", cat: "Frame" },
-        // Dojo Weapons (80)
-        { name: "IGNIS WRAITH", loc: "Chem Lab", cat: "Dojo" },
-        { name: "BUBONICO", loc: "Bio Lab", cat: "Dojo" },
-        { name: "PHENMOR", loc: "Zariman (Cavalero)", cat: "Zariman" },
-        { name: "LAETUM", loc: "Zariman (Cavalero)", cat: "Zariman" },
-        // Syndicates (10)
-        { name: "CAVIA", loc: "Sanctum Anatomica", cat: "Syndicate" },
-        { name: "HOLDFASTS", loc: "Zariman", cat: "Syndicate" },
-        { name: "SOLARIS UNITED", loc: "Fortuna", cat: "Syndicate" }
+    const NON_RELIC_WEAPONS = [
+        "IGNIS WRAITH", "BUBONICO", "HEMA", "ARCA PLASMOR", "LANKA", "AMPREX", "QUANTA", "SYBARIS", "DAIKYU", "ATTICA", "TORID", "CERATA", "PHAGE", "SCOLIAC", "ACRID", "MIOS", "DRAGON NIKANA", "JAT KITTAG", "KNUX", "SHAKU", "KESHEG", "FLUCTUS", "GRATTLER",
+        "CEDO", "TRUMNA", "SEPULCHRUM", "MORGHA", "CORTEGE", "PHENMOR", "LAETUM", "FELARX", "PRAEDOS", "INNODEM", "MITER", "PANTHERA", "SEER", "TWIN GREMLINS", "STUG", "EPITAPH", "AMBASSADOR", "SPORELACER", "VERMICPLICER", "GAZE", "TOMBFINGER", "NATARUK", "CORUFELL", "STALTA", "QUASSUS", "VITRICA", "MAUSOLON"
+    ];
+
+    const SYNDICATES = [
+        { name: "The Hex", loc: "Höllvania Mall (1999)" },
+        { name: "Cavia", loc: "Sanctum Anatomica, Deimos" },
+        { name: "The Holdfasts", loc: "Chrysalith, Zariman" },
+        { name: "Steel Meridian", loc: "Any Relay" },
+        { name: "Arbiters of Hexis", loc: "Any Relay" },
+        { name: "Cephalon Suda", loc: "Any Relay" },
+        { name: "The Perrin Sequence", loc: "Any Relay" },
+        { name: "Red Veil", loc: "Any Relay" },
+        { name: "New Loka", loc: "Any Relay" },
+        { name: "Ostron", loc: "Cetus, Earth" },
+        { name: "Solaris United", loc: "Fortuna, Venus" },
+        { name: "Vox Solaris", loc: "Fortuna (Little Duck)" },
+        { name: "Entrati", loc: "Necralisk, Deimos" },
+        { name: "Necraloid", loc: "Necralisk (Loid)" }
     ];
 
     let mastered = new Set();
     let subsumed = new Set();
+    let syndicateRanks = {};
+    let spProgress = { completed: 0, total: 280 }; // Standard 2026 total
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = JSON.parse(event.target.result);
             mastered.clear();
-            
-            // DEEP SCAN: AlecaFrame often nests items inside sub-objects
+            subsumed.clear();
+            syndicateRanks = {};
+
+            // 1. Recursive Mastery & SP Scan
             function scan(obj) {
                 for (let k in obj) {
                     if (obj[k] && typeof obj[k] === 'object') {
-                        // Check for Mastery/Rank flags
-                        if (obj[k].mastered === true || obj[k].maxed === true || (obj[k].xp && obj[k].xp > 0)) {
+                        if (obj[k].mastered === true || (obj[k].xp && obj[k].xp > 0)) {
                             mastered.add(k.toUpperCase().replace(/_/g, " ").trim());
+                        }
+                        // Check for Steel Path node completion if AlecaFrame provides it
+                        if (k === "steelPath" || k === "SteelPath") {
+                            spProgress.completed = obj[k].completedNodes || obj[k].Progress || 0;
+                            spProgress.total = obj[k].totalNodes || 280;
                         }
                         scan(obj[k]);
                     }
                 }
             }
             scan(data);
-            
-            // Standard Helminth check
+
+            // 2. Subsume Scan
             const subList = data.helminth?.subsumed || data.Helminth?.Subsumed || [];
             subList.forEach(s => subsumed.add(s.toUpperCase()));
 
-            document.getElementById('statusInfo').innerText = `✅ SYNCED: Detected ${mastered.size} Mastered items.`;
-            document.getElementById('fileStatus').innerText = "Account Data Loaded!";
+            // 3. Syndicate Scan
+            const synData = data.syndicates || data.Syndicates || {};
+            for (let s in synData) {
+                // AlecaFrame usually maps by name
+                syndicateRanks[s.toLowerCase()] = synData[s].rank || synData[s].level || 0;
+            }
+
+            document.getElementById('statusInfo').innerText = `✅ SYNCED: Detected ${mastered.size} items & ${spProgress.completed} SP nodes.`;
+            document.getElementById('fileStatus').innerText = "Data Loaded Successfully!";
         };
         reader.readAsText(e.target.files[0]);
     });
@@ -114,41 +119,59 @@
     function generateObjective() {
         let pool = [];
 
-        // 1. Static Masterables (Prio: High 100/80)
-        STATIC_DB.forEach(i => {
-            if (!mastered.has(i.name)) {
-                let prio = i.cat === "Frame" ? 100 : 80;
-                if (i.cat === "Syndicate") prio = 10;
-                pool.push({ ...i, prio: prio, reason: `Missing base ${i.cat} Mastery.` });
+        // --- 1. FRAMES (Priority 100) ---
+        ALL_FRAMES.forEach(f => {
+            if (!mastered.has(f)) {
+                pool.push({ name: f, loc: "See Codex/Wiki", cat: "Frame", prio: 100, reason: "Missing Base Frame Mastery (6,000 pts)." });
+            } else if (!subsumed.has(f) && f !== "EXCALIBUR UMBRA") {
+                pool.push({ name: f, loc: "Farm 2nd Copy", cat: "Helminth", prio: 40, reason: "Mastered, but not yet fed to Helminth." });
             }
         });
 
-        // 2. Unvaulted Relics (Prio: Middle 60)
-        UNVAULTED_DB.forEach(i => {
-            if (!mastered.has(i.name)) {
-                pool.push({ ...i, prio: 60, reason: "Currently UNVAULTED. Farm Varzia/Relics now!" });
+        // --- 2. WEAPONS (Priority 80) ---
+        NON_RELIC_WEAPONS.forEach(w => {
+            if (!mastered.has(w)) {
+                pool.push({ name: w, loc: "Boss/Dojo/Quest", cat: "Weapon", prio: 80, reason: "Missing Weapon Mastery (3,000 pts)." });
             }
         });
 
-        // 3. Subsume check (Prio: 40)
-        STATIC_DB.filter(i => i.cat === "Frame").forEach(f => {
-            if (mastered.has(f.name) && !subsumed.has(f.name)) {
-                pool.push({ ...f, prio: 40, cat: "Helminth", reason: "Mastered but not yet fed to Helminth." });
+        // --- 3. SYNDICATES (Priority 30) ---
+        SYNDICATES.forEach(s => {
+            const rank = syndicateRanks[s.name.toLowerCase()] || 0;
+            if (rank < 5) {
+                pool.push({ name: s.name, loc: s.loc, cat: "Syndicate", prio: 30, reason: `Rank ${rank}/5. Max standing for completionist status.` });
             }
         });
 
-        if (pool.length === 0) return alert("All current database items are mastered!");
+        // --- 4. STEEL PATH (Priority 10) ---
+        if (spProgress.completed < spProgress.total) {
+            pool.push({ 
+                name: "Steel Path Node", 
+                loc: "Star Chart (Steel Path Mode)", 
+                cat: "Star Chart", 
+                prio: 10, 
+                reason: `Clear missing nodes. Progress: ${spProgress.completed}/${spProgress.total}.` 
+            });
+        }
+
+        if (pool.length === 0) return alert("All targets achieved! You are a 100% Completionist in these categories.");
 
         // Weighted Selection
         let weighted = [];
         pool.forEach(p => { for(let i=0; i<p.prio; i++) weighted.push(p); });
         const win = weighted[Math.floor(Math.random() * weighted.length)];
 
+        // Update UI
         document.getElementById('cCat').innerText = win.cat;
         document.getElementById('cName').innerText = win.name;
         document.getElementById('cLoc').innerText = win.loc;
         document.getElementById('cReason').innerText = win.reason;
-        document.getElementById('pBadge').innerText = `Weight: ${win.prio}`;
+        document.getElementById('pBadge').innerText = `Priority: ${win.prio}`;
+        
+        // Dynamic Badge Colors
+        const colors = { 100: '#d2a8ff', 80: '#79c0ff', 40: '#58a6ff', 30: '#ff7b72', 10: '#f2c94c' };
+        document.getElementById('pBadge').style.borderColor = colors[win.prio];
+        document.getElementById('result').style.borderLeftColor = colors[win.prio];
         document.getElementById('result').style.display = 'block';
     }
 </script>
