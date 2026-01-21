@@ -2,116 +2,637 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tenno Mastery Matrix 2026: Completionist Edition</title>
+    <title>Tenno Matrix: Absolute Manifest</title>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; --syndicate: #ff7b72; --sp: #f2c94c; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; --weapon: #79c0ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 900px; width: 100%; }
-        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px; background: #0d1117; cursor: pointer; transition: 0.2s; }
-        .upload-zone:hover { border-color: var(--btn); background: #161b22; }
-        .btn-roll { background: var(--btn); color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.2em; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .container { max-width: 1000px; width: 100%; }
+        .upload-zone { border: 2px dashed #30363d; padding: 30px; text-align: center; border-radius: 12px; margin-bottom: 20px; background: #0d1117; cursor: pointer; }
+        .btn-roll { background: var(--btn); color: white; border: none; padding: 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.3em; transition: 0.3s; }
         .btn-roll:hover { background: #388bfd; transform: translateY(-2px); }
-        #result { background: var(--card); border: 1px solid #30363d; padding: 30px; border-radius: 15px; margin-top: 25px; display: none; border-left: 10px solid var(--frame); position: relative; text-align: left; }
+        #result { background: var(--card); border: 1px solid #30363d; padding: 35px; border-radius: 15px; margin-top: 25px; display: none; border-left: 10px solid var(--frame); position: relative; }
         .target { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #fff; letter-spacing: -1px; }
-        .location { color: var(--accent); font-family: 'Courier New', monospace; font-size: 1.3em; margin-bottom: 20px; display: block; }
-        .priority-badge { position: absolute; top: 20px; right: 20px; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; border: 1px solid; }
-        #statusInfo { margin-top: 15px; font-size: 0.9em; color: #8b949e; }
+        .location { color: var(--accent); font-family: 'Courier New', monospace; font-size: 1.3em; margin-bottom: 15px; display: block; background: rgba(46,160,67,0.1); padding: 8px; border-radius: 5px; }
+        .priority-badge { position: absolute; top: 25px; right: 25px; padding: 6px 15px; border-radius: 20px; font-size: 0.8em; font-weight: bold; border: 1px solid; }
+        #stats-bar { display: flex; gap: 10px; margin-bottom: 10px; font-size: 0.9em; color: #8b949e; justify-content: center; }
+        .stat-chip { background: #21262d; padding: 5px 12px; border-radius: 6px; border: 1px solid #30363d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Tenno Completionist Matrix 2026</h1>
+    <h1>Tenno Matrix: Absolute Manifest</h1>
     
     <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
-        <p id="fileStatus">Drop or Click to Upload <strong>AlecaFrame JSON</strong></p>
+        <p id="fileStatus">Upload <strong>AlecaFrame JSON</strong></p>
         <input type="file" id="fileInput" accept=".json" style="display:none">
-        <div id="statusInfo">Status: Awaiting Account Data...</div>
+        <div id="stats-bar">
+            <span class="stat-chip">Mastered: <b id="stat-m">0</b></span>
+            <span class="stat-chip">Subsumed: <b id="stat-s">0</b></span>
+            <span class="stat-chip">SP Nodes: <b id="stat-sp">0</b></span>
+        </div>
     </div>
 
     <button class="btn-roll" onclick="generateObjective()">GENERATE COMPLETIONIST GOAL</button>
 
     <div id="result">
         <span id="pBadge" class="priority-badge">Priority</span>
-        <div id="cCat" style="color: #8b949e; text-transform: uppercase; font-size: 0.9em;">Category</div>
+        <div id="cCat" style="color: #8b949e; text-transform: uppercase; font-size: 0.8em;">Category</div>
         <div class="target" id="cName">Target Item</div>
-        <div class="location" id="cLoc">Source Location</div>
-        <div id="cReason" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; line-height: 1.5;">Reasoning</div>
+        <div class="location" id="cLoc">Node</div>
+        <div id="cReason" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; line-height: 1.4;">Reasoning</div>
     </div>
 </div>
 
 <script>
-    // --- DATABASE: 2026 FULL ROSTER ---
-    const ALL_FRAMES = [
-        "ASH", "ATLAS", "BANSHEE", "BARUUK", "CALIBAN", "CHROMA", "CITRINE", "CYTE-09", "DAGATH", "DANTE", "EMBER", "EQUINOX", "EXCALIBUR", "FROST", "GARA", "GARUDA", "GAUSS", "GRENDEL", "GYRE", "HARROW", "HILDRYN", "HYDROID", "INAROS", "IVARA", "JADE", "KHORA", "KOUMEI", "KULLERVO", "LAVOS", "LIMBO", "LOKI", "MAG", "MESA", "MIRAGE", "NEKROS", "NEZHA", "NIDUS", "NOVA", "NYX", "OBERON", "OCTAVIA", "ORAXIA", "PROTEA", "QORVEX", "REVENANT", "RHINO", "SARYN", "SEVAGOTH", "STYANAX", "TEMPLE", "TITANIA", "TRINITY", "URIEL", "VALKYR", "VAUBAN", "VOLT", "VORUNA", "WISP", "WUKONG", "XAKU", "YARELI", "ZEPHYR", "NOKKO"
-    ];
+    const MASTER_DB = [
+        // --- WARFRAMES ---
+        [
+  { name: "ASH", loc: "Railjack Defense / Corpus Proxima", cat: "Frame" },
+  { name: "ATLAS", loc: "Jordas Precept (Eris Boss)", cat: "Frame" },
+  { name: "BANSHEE", loc: "Tenno Lab (Dojo)", cat: "Frame" },
+  { name: "BARUUK", loc: "Vox Solaris (Fortuna)", cat: "Frame" },
+  { name: "CALIBAN", loc: "Narmer Bounties (Plains/Vallis)", cat: "Frame" },
+  { name: "CHROMA", loc: "Junction Rewards", cat: "Frame" },
+  { name: "CITRINE", loc: "Tyana Pass (Mars)", cat: "Frame" },
+  { name: "CYTE-09", loc: "The Hex Syndicate Rank 5", cat: "Frame" },
+  { name: "DAGATH", loc: "Dagath's Hollow (Dojo)", cat: "Frame" },
+  { name: "DANTE", loc: "Armatus (Deimos)", cat: "Frame" },
+  { name: "EMBER", loc: "Tethys (Saturn) - Sargas Ruk", cat: "Frame" },
+  { name: "EQUINOX", loc: "Titania (Uranus) - Tyl Regor", cat: "Frame" },
+  { name: "EXCALIBUR", loc: "War (Mars) - Lech Kril", cat: "Frame" },
+  { name: "FROST", loc: "Exta (Ceres) - Kril & Vor", cat: "Frame" },
+  { name: "GARA", loc: "Cetus Bounties", cat: "Frame" },
+  { name: "GARUDA", loc: "Fortuna Bounties", cat: "Frame" },
+  { name: "GAUSS", loc: "Kappa (Sedna) Disruption", cat: "Frame" },
+  { name: "GRENDEL", loc: "Grendel Locators (Europa)", cat: "Frame" },
+  { name: "GYRE", loc: "Zariman Bounties", cat: "Frame" },
+  { name: "HARROW", loc: "Defection / Kuva Survival", cat: "Frame" },
+  { name: "HILDRYN", loc: "Exploiter Orb (Orb Vallis)", cat: "Frame" },
+  { name: "HYDROID", loc: "Oro (Earth) - Vay Hek", cat: "Frame" },
+  { name: "INAROS", loc: "Baro Ki'Teer (Quest)", cat: "Frame" },
+  { name: "IVARA", loc: "Spy Missions (All Tiers)", cat: "Frame" },
+  { name: "JADE", loc: "Brutus (Uranus) Ascension", cat: "Frame" },
+  { name: "KHORA", loc: "Sanctuary Onslaught", cat: "Frame" },
+  { name: "KOUMEI", loc: "Cetus Bounties", cat: "Frame" },
+  { name: "KULLERVO", loc: "Kullervo's Hold (Duviri)", cat: "Frame" },
+  { name: "LAVOS", loc: "Father (Necralisk)", cat: "Frame" },
+  { name: "LIMBO", loc: "Limbo Theorem Quest", cat: "Frame" },
+  { name: "LOKI", loc: "Psamathe (Neptune) - Hyena Pack", cat: "Frame" },
+  { name: "MAG", loc: "Iliad (Phobos) - The Sergeant", cat: "Frame" },
+  { name: "MESA", loc: "Mutalist Alad V (Eris)", cat: "Frame" },
+  { name: "MIRAGE", loc: "Hidden Messages Quest", cat: "Frame" },
+  { name: "NEKROS", loc: "Magnacidium (Deimos)", cat: "Frame" },
+  { name: "NEZHA", loc: "Tenno Lab (Dojo)", cat: "Frame" },
+  { name: "NIDUS", loc: "Oestrus (Eris)", cat: "Frame" },
+  { name: "NOKKO", loc: "Deepmines Bounties, Orb Vallis", cat: "Frame" },
+  { name: "NOVA", loc: "Naamah (Europa) - Raptors", cat: "Frame" },
+  { name: "NYX", loc: "Phorid Manifestations", cat: "Frame" },
+  { name: "OBERON", loc: "Railjack Earth/Saturn/Pluto", cat: "Frame" },
+  { name: "OCTAVIA", loc: "Lua Music Room / Plato", cat: "Frame" },
+  { name: "ORAXIA", loc: "The Old Peace (Quest)", cat: "Frame" },
+  { name: "PROTEA", loc: "Granum Void", cat: "Frame" },
+  { name: "QORVEX", loc: "Sanctum Anatomica Bounties", cat: "Frame" },
+  { name: "REVENANT", loc: "Nakak Quest / Cetus Bounties", cat: "Frame" },
+  { name: "RHINO", loc: "Fossa (Venus) - Jackal", cat: "Frame" },
+  { name: "SARYN", loc: "Merrow (Sedna) - Kela", cat: "Frame" },
+  { name: "SEVAGOTH", loc: "Railjack Void Storms", cat: "Frame" },
+  { name: "STYANAX", loc: "Chipper (Kahl's Garrison)", cat: "Frame" },
+  { name: "TEMPLE", loc: "Mall Core, Höllvania (1999)", cat: "Frame" },
+  { name: "TITANIA", loc: "Silver Grove Quest", cat: "Frame" },
+  { name: "TRINITY", loc: "Ambulas (Pluto)", cat: "Frame" },
+  { name: "URIEL", loc: "La Cathédrale (Roathe Boss)", cat: "Frame" },
+  { name: "VALKYR", loc: "Themisto (Jupiter) - Alad V", cat: "Frame" },
+  { name: "VAUBAN", loc: "Nightwave Offerings", cat: "Frame" },
+  { name: "VOLT", loc: "Tenno Lab (Dojo)", cat: "Frame" },
+  { name: "VORUNA", loc: "Yuvarium (Lua)", cat: "Frame" },
+  { name: "WISP", loc: "Ropalolyst (Jupiter)", cat: "Frame" },
+  { name: "WUKONG", loc: "Tenno Lab (Dojo)", cat: "Frame" },
+  { name: "XAKU", loc: "Entrati Bounties", cat: "Frame" },
+  { name: "YARELI", loc: "Ventkids Lab (Dojo)", cat: "Frame" },
+  { name: "ZEPHYR", loc: "Tenno Lab (Dojo)", cat: "Frame" }
+        ],
 
-    const NON_RELIC_WEAPONS = [
-        "IGNIS WRAITH", "BUBONICO", "HEMA", "ARCA PLASMOR", "LANKA", "AMPREX", "QUANTA", "SYBARIS", "DAIKYU", "ATTICA", "TORID", "CERATA", "PHAGE", "SCOLIAC", "ACRID", "MIOS", "DRAGON NIKANA", "JAT KITTAG", "KNUX", "SHAKU", "KESHEG", "FLUCTUS", "GRATTLER",
-        "CEDO", "TRUMNA", "SEPULCHRUM", "MORGHA", "CORTEGE", "PHENMOR", "LAETUM", "FELARX", "PRAEDOS", "INNODEM", "MITER", "PANTHERA", "SEER", "TWIN GREMLINS", "STUG", "EPITAPH", "AMBASSADOR", "SPORELACER", "VERMICPLICER", "GAZE", "TOMBFINGER", "NATARUK", "CORUFELL", "STALTA", "QUASSUS", "VITRICA", "MAUSOLON"
-    ];
+        // --- WEAPONS: Primaries
+const primaryWeapons = [
+  { name: "ACCELTRA", loc: "Ur (Uranus) - Demolisher Drops", cat: "Primary" },
+  { name: "ACCELTRA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "AEOLAK", loc: "Zariman Bounties", cat: "Primary" },
+  { name: "AFENTIS", loc: "Chipper (Kahl's Garrison)", cat: "Primary" },
+  { name: "ALTERNOX", loc: "Gyre (Zariman) / Market", cat: "Primary" },
+  { name: "AMBASSADOR", loc: "Railjack Survival (Corpus Proxima)", cat: "Primary" },
+  { name: "AMPREX", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "ARCA PLASMOR", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "ARGONAK", loc: "Chem Lab (Dojo)", cat: "Primary" },
+  { name: "ASTILLA", loc: "Market Blueprint", cat: "Primary" },
+  { name: "ASTILLA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "ATTICA", loc: "Tenno Lab (Dojo)", cat: "Primary" },
+  { name: "AX-52", loc: "The Hex Syndicate / Baro Ki'Teer", cat: "Primary" },
+  { name: "BASMU", loc: "Operation: Scarlet Spear / Father (Deimos)", cat: "Primary" },
+  { name: "BATTACOR", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "BAZA", loc: "Tenno Lab (Dojo)", cat: "Primary" },
+  { name: "BAZA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "BOAR", loc: "Drekar Troopers (Uranus)", cat: "Primary" },
+  { name: "BOAR PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "BOLTOR", loc: "Market / Junction Reward", cat: "Primary" },
+  { name: "BOLTOR PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "BRATON", loc: "Market (Credits)", cat: "Primary" },
+  { name: "BRATON PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "BRATON VANDAL", loc: "Elite Sanctuary Onslaught", cat: "Primary" },
+  { name: "BUBONICO", loc: "Bio Lab (Dojo)", cat: "Primary" },
+  { name: "BURSTON", loc: "Market Blueprint", cat: "Primary" },
+  { name: "BURSTON PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "BUZLOK", loc: "Chem Lab (Dojo)", cat: "Primary" },
+  { name: "CARMINE PENTA", loc: "Railjack (Corpus) / Baro Ki'Teer", cat: "Primary" },
+  { name: "CEDO", loc: "Father (Necralisk) / Entrati Rank 4", cat: "Primary" },
+  { name: "CERNOS", loc: "Market Blueprint", cat: "Primary" },
+  { name: "CERNOS PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "CHAKKHURR (KUVA)", loc: "Kuva Lich System", cat: "Primary" },
+  { name: "CINTA", loc: "Duviri Puzzles", cat: "Primary" },
+  { name: "CODA BASSOCYST", loc: "Technocyte Coda (Infested Lich)", cat: "Primary" },
+  { name: "CODA HEMA", loc: "Technocyte Coda (Infested Lich)", cat: "Primary" },
+  { name: "CODA SPOROTHRIX", loc: "Technocyte Coda (Infested Lich)", cat: "Primary" },
+  { name: "CODA SYNAPSE", loc: "Technocyte Coda (Infested Lich)", cat: "Primary" },
+  { name: "CONVECTRIX", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "CORINTH", loc: "Market Blueprint", cat: "Primary" },
+  { name: "CORINTH PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "DAIKYU", loc: "Tenno Lab (Dojo)", cat: "Primary" },
+  { name: "DERA", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "DERA VANDAL", loc: "Invasions", cat: "Primary" },
+  { name: "DREAD", loc: "The Stalker", cat: "Primary" },
+  { name: "EFV-0 SOMNUS", loc: "Höllvania (1999) Drops", cat: "Primary" },
+  { name: "EVENSONG", loc: "Jade Shadows Quest / Brutus (Uranus)", cat: "Primary" },
+  { name: "EXERGIS", loc: "Market Blueprint", cat: "Primary" },
+  { name: "FELARX", loc: "Cavalero (Zariman) Rank 3", cat: "Primary" },
+  { name: "FERROX", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "FLUX RIFLE", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "FULMIN", loc: "Market Blueprint", cat: "Primary" },
+  { name: "FULMIN PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "GLAXION VANDAL", loc: "Railjack / Baro Ki'Teer", cat: "Primary" },
+  { name: "GORGON", loc: "Heavy Gunner Drops", cat: "Primary" },
+  { name: "GOTVA PRIME", loc: "Baro Ki'Teer / Twitch Drop", cat: "Primary" },
+  { name: "GRAKATA", loc: "Market Blueprint", cat: "Primary" },
+  { name: "GRINLOK", loc: "Chem Lab (Dojo)", cat: "Primary" },
+  { name: "HEK", loc: "Market Blueprint", cat: "Primary" },
+  { name: "HEMA", loc: "Bio Lab (Dojo)", cat: "Primary" },
+  { name: "IGNIS WRAITH", loc: "Chem Lab (Dojo) / Baro Ki'Teer", cat: "Primary" },
+  { name: "JAVLOK", loc: "Chem Lab (Dojo)", cat: "Primary" },
+  { name: "KARAK WRAITH", loc: "Invasions", cat: "Primary" },
+  { name: "KOMOREX", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "KUVA BRAMMA", loc: "Kuva Lich System", cat: "Primary" },
+  { name: "KUVA OGRIS", loc: "Kuva Lich System", cat: "Primary" },
+  { name: "KUVA ZARR", loc: "Kuva Lich System", cat: "Primary" },
+  { name: "LANKA", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "LATRON PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "LENZ", loc: "Energy Lab (Dojo)", cat: "Primary" },
+  { name: "MITER", loc: "Exta (Ceres) - Kril & Vor", cat: "Primary" },
+  { name: "MUTALIST CERNOS", loc: "Market Blueprint", cat: "Primary" },
+  { name: "NATARUK", loc: "The New War Quest", cat: "Primary" },
+  { name: "OPTICOR VANDAL", loc: "Thermia Fractures (Orb Vallis)", cat: "Primary" },
+  { name: "PARACYST", loc: "Bio Lab (Dojo)", cat: "Primary" },
+  { name: "PARIS PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "PENTA", loc: "Market Blueprint", cat: "Primary" },
+  { name: "PHANTASMA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "PHENMOR", loc: "Cavalero (Zariman) Rank 4", cat: "Primary" },
+  { name: "QUANTA VANDAL", loc: "Baro Ki'Teer", cat: "Primary" },
+  { name: "QUELLOR", loc: "Railjack Commander Drops", cat: "Primary" },
+  { name: "RUBICO PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "SHEATH", loc: "Sanctum Anatomica Bounties", cat: "Primary" },
+  { name: "SHEDU", loc: "Symbilyst Drops (Erra Quest)", cat: "Primary" },
+  { name: "SOBEK", loc: "Market Blueprint", cat: "Primary" },
+  { name: "SOMA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "STAHLTA", loc: "Jackal (Fossa, Venus) / Granum Void", cat: "Primary" },
+  { name: "STRUN PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "SUPRA VANDAL", loc: "Baro Ki'Teer / Star Days", cat: "Primary" },
+  { name: "SYBARIS PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "TENET ARCA PLASMOR", loc: "Sisters of Parvos System", cat: "Primary" },
+  { name: "TENET ENVOY", loc: "Sisters of Parvos System", cat: "Primary" },
+  { name: "TENORA PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "TIBERON PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "TIGRIS PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "TONKOR", loc: "Market Blueprint", cat: "Primary" },
+  { name: "TORID", loc: "Bio Lab (Dojo)", cat: "Primary" },
+  { name: "TRUMNA", loc: "Father (Necralisk) Rank 3", cat: "Primary" },
+  { name: "VAYKOR HEK", loc: "Steel Meridian (125k Standing)", cat: "Primary" },
+  { name: "VECTIS PRIME", loc: "Void Relics (Fissures)", cat: "Primary" },
+  { name: "VELDT", loc: "Tenno Lab (Dojo)", cat: "Primary" },
+  { name: "ZHUGE PRIME", loc: "Void Relics (Fissures)", cat: "Primary" }
+]
+                // --- WEAPONS: Secondaires
+    const secondaryWeapons = [
+  { name: "ACRID", loc: "Bio Lab (Dojo)", cat: "Secondary" },
+  { name: "AEGRIT", loc: "Kahl's Garrison (Chipper)", cat: "Secondary" },
+  { name: "AFURIS", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AFURIS PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKARIUS", loc: "Ur (Uranus) - Demolisher Drops", cat: "Secondary" },
+  { name: "AKARIUS PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKBOLTO", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKBOLTO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKBRONCO", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKBRONCO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKJAGARA", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKJAGARA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKLEX", loc: "Baro Ki'Teer (Relic)", cat: "Secondary" },
+  { name: "AKLEX PRIME", loc: "Baro Ki'Teer (Relic)", cat: "Secondary" },
+  { name: "AKMAGNUS", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKMAGNUS PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKSOMATI", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKSOMATI PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKSTILETTO", loc: "Tenno Lab (Dojo)", cat: "Secondary" },
+  { name: "AKSTILETTO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKVASTO", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AKVASTO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "AKZANI", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "ANGSTRUM", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "PRISMA ANGSTRUM", loc: "Baro Ki'Teer", cat: "Secondary" },
+  { name: "ARCA SCISCO", loc: "Energy Lab (Dojo)", cat: "Secondary" },
+  { name: "ATHODAI", loc: "Railjack (Corpus) / Baro", cat: "Secondary" },
+  { name: "ATOMOS", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "AZIMA", loc: "Daily Login Reward (Day 100+)", cat: "Secondary" },
+  { name: "BALLISTICA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "BRAKK", loc: "The G3 (Grustrag Three)", cat: "Secondary" },
+  { name: "KUVA BRAKK", loc: "Kuva Lich System", cat: "Secondary" },
+  { name: "BRONCO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "CANTARE", loc: "Jade Shadows Quest / Brutus (Uranus)", cat: "Secondary" },
+  { name: "CATABOLYST", loc: "Bio Lab (Dojo)", cat: "Secondary" },
+  { name: "CODA CATABOLYST", loc: "Technocyte Coda (Infested Lich)", cat: "Secondary" },
+  { name: "CESTRA", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "CYANEX", loc: "Energy Lab (Dojo)", cat: "Secondary" },
+  { name: "CYCRON", loc: "Energy Lab (Dojo)", cat: "Secondary" },
+  { name: "TENET CYCRON", loc: "Sisters of Parvos System", cat: "Secondary" },
+  { name: "DESPAIR", loc: "The Stalker", cat: "Secondary" },
+  { name: "DETRON", loc: "Zanuka Hunter", cat: "Secondary" },
+  { name: "MARA DETRON", loc: "Baro Ki'Teer", cat: "Secondary" },
+  { name: "TENET DETRON", loc: "Sisters of Parvos System", cat: "Secondary" },
+  { name: "DIPLOS (TENET)", loc: "Sisters of Parvos System", cat: "Secondary" },
+  { name: "DUAL TOXOCYST", loc: "Bio Lab (Dojo)", cat: "Secondary" },
+  { name: "EMBOLIST", loc: "Bio Lab (Dojo)", cat: "Secondary" },
+  { name: "EPITAPH", loc: "Railjack Void Storms", cat: "Secondary" },
+  { name: "EPITAPH PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "EUPHONA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "FURIS", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "DEX FURIS", loc: "Anniversary Reward", cat: "Secondary" },
+  { name: "GAMMACOR", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "SYNOID GAMMACOR", loc: "Cephalon Suda", cat: "Secondary" },
+  { name: "GRIMOIRE", loc: "Whispers in the Walls Quest / Sanctum", cat: "Secondary" },
+  { name: "HIKOU PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "HYSTRIX PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "KNELL PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "KOHMAK", loc: "Kela De Thaym (Sedna)", cat: "Secondary" },
+  { name: "KOMPRESSA", loc: "Ventkids (Fortuna)", cat: "Secondary" },
+  { name: "KOMPRESSA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "KRAKEN", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "KUVA KRAKEN", loc: "Kuva Lich System", cat: "Secondary" },
+  { name: "KULSTAR", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "LAETUM", loc: "Cavalero (Zariman) Rank 3", cat: "Secondary" },
+  { name: "LATO VANDAL", loc: "Elite Sanctuary Onslaught", cat: "Secondary" },
+  { name: "LEX PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "MAGNUS PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "MARELOK", loc: "Chem Lab (Dojo)", cat: "Secondary" },
+  { name: "VAYKOR MARELOK", loc: "Steel Meridian", cat: "Secondary" },
+  { name: "NUKOR", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "KUVA NUKOR", loc: "Kuva Lich System", cat: "Secondary" },
+  { name: "OCUCOR", loc: "Energy Lab (Dojo)", cat: "Secondary" },
+  { name: "ONOS", loc: "Dante Unbound / Armatus (Deimos)", cat: "Secondary" },
+  { name: "PANDERO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "PLINX", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "TENET PLINX", loc: "Sisters of Parvos System", cat: "Secondary" },
+  { name: "POX", loc: "Bio Lab (Dojo)", cat: "Secondary" },
+  { name: "CODA POX", loc: "Technocyte Coda (Infested Lich)", cat: "Secondary" },
+  { name: "PYRANA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "QUATZ", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "SCALDRA BARBICAN", loc: "1999 Eleanor Offerings", cat: "Secondary" },
+  { name: "SEER", loc: "Captain Vor (Mercury)", cat: "Secondary" },
+  { name: "KUVA SEER", loc: "Kuva Lich System", cat: "Secondary" },
+  { name: "SEPULCRUM", loc: "Father (Necralisk) Rank 3", cat: "Secondary" },
+  { name: "SICARUS PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "SONICOR", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "SPECTRA VANDAL", loc: "Railjack (Veil Proxima)", cat: "Secondary" },
+  { name: "SPIRA PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "SPIREX (TENET)", loc: "Sisters of Parvos System", cat: "Secondary" },
+  { name: "STUBBA", loc: "Ghoul Bounties (Cetus)", cat: "Secondary" },
+  { name: "KUVA TWIN STUBBAS", loc: "Kuva Lich System", cat: "Secondary" },
+  { name: "TYSIS", loc: "Market Blueprint", cat: "Secondary" },
+  { name: "CODA TYSIS", loc: "Technocyte Coda (Infested Lich)", cat: "Secondary" },
+  { name: "VASTO PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "VELOX PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "VIPER WRAITH", loc: "Invasions", cat: "Secondary" },
+  { name: "ZAKTI PRIME", loc: "Void Relics (Fissures)", cat: "Secondary" },
+  { name: "ZYLOK PRIME", loc: "Baro Ki'Teer / Void Fissures", cat: "Secondary" },
+  { name: "ZYMOS", loc: "Father (Necralisk) Rank 2", cat: "Secondary" }
+]
+                    // --- WEAPONS: Melee
+    const meleeWeapons = [
+  { name: "ACK & BRUNT", loc: "Chem Lab (Dojo)", cat: "Melee" },
+  { name: "AMANATA", loc: "Sanctum Anatomica Bounties", cat: "Melee" },
+  { name: "AMPHIS", loc: "Market Blueprint", cat: "Melee" },
+  { name: "ANKU", loc: "Tenno Lab (Dojo)", cat: "Melee" },
+  { name: "ANKYROS PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "ARCA TITRON", loc: "Energy Lab (Dojo)", cat: "Melee" },
+  { name: "ARGO & VEL", loc: "Duviri Paradox (Acrithis)", cat: "Melee" },
+  { name: "ARUM SPINOSA", loc: "Isolation Vault Bounties (Deimos)", cat: "Melee" },
+  { name: "ATTERAX", loc: "Market Blueprint", cat: "Melee" },
+  { name: "AZOTHANE", loc: "Duviri Paradox (Acrithis)", cat: "Melee" },
+  { name: "BO PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "BOLTACE", loc: "Tenno Lab (Dojo)", cat: "Melee" },
+  { name: "BROKEN WAR", loc: "The Second Dream Quest", cat: "Melee" },
+  { name: "CADUS", loc: "Market Blueprint", cat: "Melee" },
+  { name: "CASSOWAR", loc: "Tenno Lab (Dojo)", cat: "Melee" },
+  { name: "CAUSTACYST", loc: "Bio Lab (Dojo)", cat: "Melee" },
+  { name: "CERAMIC DAGGER", loc: "Nightwave Cred Offerings", cat: "Melee" },
+  { name: "CERATA", loc: "Bio Lab (Dojo)", cat: "Melee" },
+  { name: "CETI LACERA", loc: "Operation: Scarlet Spear / Father", cat: "Melee" },
+  { name: "COBRA & CRANE PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "CODA CAUSTACYST", loc: "Technocyte Coda (Infested Lich)", cat: "Melee" },
+  { name: "CODA HIRUDO", loc: "Technocyte Coda (Infested Lich)", cat: "Melee" },
+  { name: "CODA MIRE", loc: "Technocyte Coda (Infested Lich)", cat: "Melee" },
+  { name: "CODA MOTOVORE", loc: "Technocyte Coda (Infested Lich)", cat: "Melee" },
+  { name: "CODA PATHOCYST", loc: "Technocyte Coda (Infested Lich)", cat: "Melee" },
+  { name: "CORUFELL", loc: "Citrine’s Last Wish (Tyana Pass, Mars)", cat: "Melee" },
+  { name: "CRONUS", loc: "Captain Vor (Tolstoj, Mercury)", cat: "Melee" },
+  { name: "DAKRA PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "DARK SPLIT-SWORD", loc: "Tenno Lab (Dojo)", cat: "Melee" },
+  { name: "DESTREZA PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "DEX NIKANA", loc: "Anniversary Reward", cat: "Melee" },
+  { name: "DORRCLAVE", loc: "Abyssal Zone (Zariman)", cat: "Melee" },
+  { name: "DUAL ICHOR", loc: "Bio Lab (Dojo)", cat: "Melee" },
+  { name: "DUAL KERES PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "DUAL VICISS", loc: "1999 Eleanor Offerings (Scaldra)", cat: "Melee" },
+  { name: "EDUN", loc: "Duviri Paradox (Acrithis)", cat: "Melee" },
+  { name: "EKHEIN", loc: "Sanctum Anatomica Bounties", cat: "Melee" },
+  { name: "FANG PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "FRAGOR PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "FURAX WRAITH", loc: "Bounties / Invasions", cat: "Melee" },
+  { name: "GALATINE PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "GHOULSAW", loc: "Bash Lab (Dojo) / Ghoul Bounties", cat: "Melee" },
+  { name: "GLAIVE PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "GRAM PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "GUANDAO PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "HALIKAR WRAITH", loc: "Baro Ki'Teer", cat: "Melee" },
+  { name: "HARMONY", loc: "Jade Shadows Quest / Brutus (Uranus)", cat: "Melee" },
+  { name: "HATE", loc: "The Stalker", cat: "Melee" },
+  { name: "HESPAR", loc: "Zariman Void Armageddon", cat: "Melee" },
+  { name: "HIRUDO", loc: "Market Blueprint", cat: "Melee" },
+  { name: "INNODEM", loc: "Cavalero (Zariman) Rank 5", cat: "Melee" },
+  { name: "JAT KUSAR", loc: "Chem Lab (Dojo)", cat: "Melee" },
+  { name: "KARYST PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "KERATINOS", loc: "Father (Necralisk) Rank 3", cat: "Melee" },
+  { name: "KRONEN PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "KULLERVO’S RUVOX", loc: "Kullervo's Hold (Duviri)", cat: "Melee" },
+  { name: "LESION", loc: "Market Blueprint", cat: "Melee" },
+  { name: "MACHOI (SCALDRA)", loc: "1999 Eleanor Offerings", cat: "Melee" },
+  { name: "MAGISTAR", loc: "Market Blueprint", cat: "Melee" },
+  { name: "NAMI SKYLA PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "NIKANA PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "NINKONDI PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "ORTHOS PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "PANGOLIN PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "PARACESIS", loc: "Chimera Prologue Quest", cat: "Melee" },
+  { name: "PATHOCYST", loc: "Emissary Zealoid Prelate (Deimos)", cat: "Melee" },
+  { name: "PENNANT", loc: "Railjack Commander Drops", cat: "Melee" },
+  { name: "PRAEDOS", loc: "Cavalero (Zariman) Rank 5", cat: "Melee" },
+  { name: "PRISMA OHMA", loc: "Baro Ki'Teer", cat: "Melee" },
+  { name: "PRISMA SKANA", loc: "Baro Ki'Teer", cat: "Melee" },
+  { name: "QUASSUS PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "REAPER PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "REDEEMER PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "SAMPOTES", loc: "Duviri Paradox (Acrithis)", cat: "Melee" },
+  { name: "SCINDO PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "SILVA & AEGIS PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "STROPHA", loc: "Jackal (Fossa, Venus) / Granum Void", cat: "Melee" },
+  { name: "SUN & MOON", loc: "The Duviri Paradox Quest", cat: "Melee" },
+  { name: "SYAM", loc: "Duviri Paradox (Acrithis)", cat: "Melee" },
+  { name: "TATSU PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "TEKKO PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "TENET AGENDUS", loc: "Ergo Glast (Perrin Sequence)", cat: "Melee" },
+  { name: "TENET EXEC", loc: "Ergo Glast (Perrin Sequence)", cat: "Melee" },
+  { name: "TENET GRIGORI", loc: "Ergo Glast (Perrin Sequence)", cat: "Melee" },
+  { name: "TENET LIVIA", loc: "Ergo Glast (Perrin Sequence)", cat: "Melee" },
+  { name: "TIPEDO PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "VASTILOK", loc: "Baro Ki'Teer / Event Reward", cat: "Melee" },
+  { name: "VENKA PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "VERDILAC", loc: "Narmer Bounties", cat: "Melee" },
+  { name: "VITRICA", loc: "Nihil’s Oubliette (Nightwave)", cat: "Melee" },
+  { name: "VOLNUS PRIME", loc: "Void Relics (Fissures)", cat: "Melee" },
+  { name: "WAR", loc: "Shadow Stalker", cat: "Melee" },
+  { name: "WOLF SLEDGE", loc: "Wolf of Saturn Six (Beacon)", cat: "Melee" },
+  { name: "XORIS", loc: "The Deadlock Protocol Quest", cat: "Melee" },
+  { name: "ZENISTAR", loc: "Daily Login Reward (Day 100+)", cat: "Melee" }
+];
 
+const companions = [
+  { name: "ADARZA KAVAT", loc: "Kavat Incubator Upgrade (Genetics)", cat: "Beast" },
+  { name: "CARRIER", loc: "Market Blueprint", cat: "Sentinel" },
+  { name: "CARRIER PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" },
+  { name: "CAVATINA", loc: "Höllvania (1999) Syndicate", cat: "Robotic" },
+  { name: "CHESSA KUBROW", loc: "Howl of the Kubrow (Genetics)", cat: "Beast" },
+  { name: "DEATHCUBE", loc: "Market Blueprint", cat: "Sentinel" },
+  { name: "DEATHCUBE PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" },
+  { name: "DIRIGA", loc: "Market Blueprint", cat: "Sentinel" },
+  { name: "DJINN", loc: "Bio Lab (Dojo)", cat: "Sentinel" },
+  { name: "HELIOS", loc: "Energy Lab (Dojo)", cat: "Sentinel" },
+  { name: "HELIOS PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" },
+  { name: "HELMINTH CHARGER", loc: "Helminth Infirmary (Cyst)", cat: "Beast" },
+  { name: "HOUND (MODEL G)", loc: "Sisters of Parvos System", cat: "Robotic" },
+  { name: "HURAS KUBROW", loc: "Howl of the Kubrow (Genetics)", cat: "Beast" },
+  { name: "NAUTILUS", loc: "Railjack (Neptune Ice Mine)", cat: "Sentinel" },
+  { name: "NAUTILUS PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" },
+  { name: "ORPHID", loc: "Sanctum Anatomica Bounties", cat: "Robotic" },
+  { name: "OXYLUS", loc: "The Business (Fortuna Rank 5)", cat: "Sentinel" },
+  { name: "PANZER VULPAPHLYA", loc: "Son (Necralisk) / Deimos Wilds", cat: "Beast" },
+  { name: "PARASITIC PREDASITE", loc: "Son (Necralisk) / Deimos Wilds", cat: "Beast" },
+  { name: "PENUMBRA", loc: "1999 Eleanor Offerings", cat: "Robotic" },
+  { name: "PRISMA SHADE", loc: "Baro Ki'Teer", cat: "Sentinel" },
+  { name: "RAKSA KUBROW", loc: "Howl of the Kubrow (Genetics)", cat: "Beast" },
+  { name: "SAHASA KUBROW", loc: "Howl of the Kubrow (Genetics)", cat: "Beast" },
+  { name: "SHADE PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" },
+  { name: "SMEETA KAVAT", loc: "Kavat Incubator Upgrade (Genetics)", cat: "Beast" },
+  { name: "SUNIKA KUBROW", loc: "Howl of the Kubrow (Genetics)", cat: "Beast" },
+  { name: "TAXON", loc: "Earth to Venus Junction", cat: "Sentinel" },
+  { name: "VASCA KAVAT", loc: "Vasca Virus (Plains of Eidolon)", cat: "Beast" },
+  { name: "VIZIER PREDASITE", loc: "Son (Necralisk) / Deimos Wilds", cat: "Beast" },
+  { name: "WYRM PRIME", loc: "Void Relics (Fissures)", cat: "Sentinel" }
+];
+    const companionWeapons = [
+  { name: "ARTAX", loc: "Acquired with Taxon", cat: "Comp-Weapon" },
+  { name: "BURSTON SENTINEL", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "DEATH MACHINE RIFLE PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "DECONSTRUCTOR PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "DETH MACHINE RIFLE", loc: "Acquired with Dethcube", cat: "Comp-Weapon" },
+  { name: "HELSTRUM", loc: "Legs (Fortuna)", cat: "Comp-Weapon" },
+  { name: "LASER RIFLE PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "MULTICRON (TENET)", loc: "Sisters of Parvos (Hound)", cat: "Comp-Weapon" },
+  { name: "REWATCH (1999)", loc: "Höllvania Drops", cat: "Comp-Weapon" },
+  { name: "STINGER", loc: "Acquired with Djinn", cat: "Comp-Weapon" },
+  { name: "SWEEPER PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "TAZICOR", loc: "Legs (Fortuna)", cat: "Comp-Weapon" },
+  { name: "VULKOK PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "VULC AX PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" },
+  { name: "VERGLAS PRIME", loc: "Void Relics (Fissures)", cat: "Comp-Weapon" }
+];
+    const archwings = [
+  { name: "AMESHA", loc: "Tenno Lab (Dojo)", cat: "Archwing" },
+  { name: "ELYTRON", loc: "Tenno Lab (Dojo)", cat: "Archwing" },
+  { name: "ITZAL", loc: "Tenno Lab (Dojo)", cat: "Archwing" },
+  { name: "ODONATA", loc: "The Archwing (Quest)", cat: "Archwing" },
+  { name: "ODONATA PRIME", loc: "Void Relics (Fissures)", cat: "Archwing" }
+];
+    const archguns = [
+  { name: "CORVAS", loc: "Market Blueprint / Syndicates", cat: "Archgun" },
+  { name: "CORVAS PRIME", loc: "Void Relics (Fissures)", cat: "Archgun" },
+  { name: "CYNGAS", loc: "Market Blueprint / Syndicates", cat: "Archgun" },
+  { name: "DECURION (DUAL)", loc: "Market Blueprint / Syndicates", cat: "Archgun" },
+  { name: "DECURION (PRISMA DUAL)", loc: "Baro Ki'Teer", cat: "Archgun" },
+  { name: "FLUCTUS", loc: "Tenno Lab (Dojo)", cat: "Archgun" },
+  { name: "GRATTLER", loc: "Chem Lab (Dojo)", cat: "Archgun" },
+  { name: "GRATTLER (KUVA)", loc: "Kuva Lich System", cat: "Archgun" },
+  { name: "IMPERATOR", loc: "The Archwing (Quest)", cat: "Archgun" },
+  { name: "IMPERATOR VANDAL", loc: "Balor Formorian Event", cat: "Archgun" },
+  { name: "LARKSPUR", loc: "Tenno Lab (Dojo)", cat: "Archgun" },
+  { name: "LARKSPUR PRIME", loc: "Void Relics (Fissures)", cat: "Archgun" },
+  { name: "MAUSOLON", loc: "Acquired with Necramech (Father)", cat: "Archgun" },
+  { name: "MORGHA", loc: "Father (Necralisk) Rank 3", cat: "Archgun" },
+  { name: "ONORIX", loc: "Market Blueprint / Syndicates", cat: "Archgun" },
+  { name: "PHAEDRA", loc: "Market Blueprint / Syndicates", cat: "Archgun" },
+  { name: "PHOEBUS", loc: "1999 Eleanor Offerings", cat: "Archgun" },
+  { name: "TRUMNA PRIME (ARCH)", loc: "Void Relics (Fissures)", cat: "Archgun" },
+  { name: "VELOCITUS", loc: "Tenno Lab (Dojo)", cat: "Archgun" }
+];
+    const archmelee = [
+  { name: "AGKUZA", loc: "Market Blueprint / Syndicates", cat: "Archmelee" },
+  { name: "CENTAUR", loc: "Market Blueprint / Syndicates", cat: "Archmelee" },
+  { name: "KASZAS", loc: "Market Blueprint / Syndicates", cat: "Archmelee" },
+  { name: "KNUX", loc: "Chem Lab (Dojo)", cat: "Archmelee" },
+  { name: "ONORIX", loc: "Market Blueprint / Syndicates", cat: "Archmelee" },
+  { name: "RATHBONE", loc: "Market Blueprint / Syndicates", cat: "Archmelee" },
+  { name: "SYTHE PRIME", loc: "Void Relics (Fissures)", cat: "Archmelee" },
+  { name: "VERITUX", loc: "The Archwing (Quest)", cat: "Archmelee" },
+  { name: "VERITUX (PRISMA)", loc: "Baro Ki'Teer", cat: "Archmelee" }
+];
+    const necramechs = [
+  { name: "BONEWIDOW", loc: "Father (Necralisk) / Loid", cat: "Necramech" },
+  { name: "VOIDRIG", loc: "Father (Necralisk) / Loid", cat: "Necramech" }
+];
+
+const necramechMelee = [
+  { name: "IRONBRIDE", loc: "Exalted Weapon (Bonewidow)", cat: "Necramech-Melee" },
+  { name: "PUGIL", loc: "Exalted Weapon (Voidrig)", cat: "Necramech-Melee" }
+];
+    const vehicles = [
+  // K-DRIVES (Based on Board Blueprints)
+  { name: "BAD BABY", loc: "Ventkids (Fortuna)", cat: "K-Drive" },
+  { name: "FLATBELLY", loc: "Ventkids (Fortuna)", cat: "K-Drive" },
+  { name: "NEEDLENOSE", loc: "Ventkids (Fortuna)", cat: "K-Drive" },
+  { name: "POINTER", loc: "Ventkids (Fortuna)", cat: "K-Drive" },
+  { name: "FEVERSPINE", loc: "Grandmother (Deimos)", cat: "K-Drive" },
+  { name: "YARELI'S MERULINA", loc: "Exalted Vehicle (Yareli)", cat: "K-Drive" },
+  
+  // MOUNTS
+  { name: "KAITHE", loc: "The Duviri Paradox Quest", cat: "Mount" },
+  { name: "ATOMICYCLE", loc: "Höllvania (1999) Quest", cat: "Mount" }
+];
+    const hounds = [
+  { name: "ADHERENT HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "BHURA HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "DORMER HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "GYRE HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "HAPAX HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "KAIJU HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "SCHEMER HOUND", loc: "Sisters of Parvos System", cat: "Hound" },
+  { name: "URGENT HOUND", loc: "Sisters of Parvos System", cat: "Hound" }
+];
+    const moas = [
+  { name: "BRACKET MOA", loc: "Legs (Fortuna)", cat: "Moa" },
+  { name: "LAMBEO MOA", loc: "Legs (Fortuna)", cat: "Moa" },
+  { name: "NIDUS MOA", loc: "Legs (Fortuna)", cat: "Moa" },
+  { name: "OLAY MOA", loc: "Legs (Fortuna)", cat: "Moa" },
+  { name: "PARA MOA", loc: "Legs (Fortuna)", cat: "Moa" }
+];
+    const zaws = [
+  { name: "BALLA", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "CYATH", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "DEHTAT", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "DOKRAHM", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "KRONSH", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "MEW AN", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "OSTRINGR", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "PAGH", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "PLAGUE KRIPATH", loc: "Operation: Plague Star", cat: "Zaw" },
+  { name: "PLAGUE KEWAR", loc: "Operation: Plague Star", cat: "Zaw" },
+  { name: "RABVEE", loc: "Hok (Cetus)", cat: "Zaw" },
+  { name: "SEPFAHN", loc: "Hok (Cetus)", cat: "Zaw" }
+];
+    const kitguns = [
+  { name: "BASMU (CHAMBER)", loc: "Father (Deimos)", cat: "Kitgun" },
+  { name: "CATCHMOON", loc: "Rude Zuud (Fortuna)", cat: "Kitgun" },
+  { name: "GAZE", loc: "Rude Zuud (Fortuna)", cat: "Kitgun" },
+  { name: "RAMPART", loc: "Cavalero (Zariman)", cat: "Kitgun" },
+  { name: "RATTLEGUTS", loc: "Rude Zuud (Fortuna)", cat: "Kitgun" },
+  { name: "SHRAKSUN", loc: "Rude Zuud (Fortuna)", cat: "Kitgun" },
+  { name: "SPORELACER", loc: "Father (Deimos)", cat: "Kitgun" },
+  { name: "TOMBFINGER", loc: "Rude Zuud (Fortuna)", cat: "Kitgun" },
+  { name: "VERMISPLICER", loc: "Father (Deimos)", cat: "Kitgun" }
+];
+    const ampPrisms = [
+  { name: "CANTIC", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "KLAMORA", loc: "Little Duck (Fortuna)", cat: "Amp" },
+  { name: "LOHRIN", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "PENECHA", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "RAPLAK", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "SCAFFOLD", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "SHRAKSUN", loc: "Onkko (Cetus)", cat: "Amp" },
+  { name: "TIROC", loc: "Little Duck (Fortuna)", cat: "Amp" }
+];
+    
     const SYNDICATES = [
-        { name: "The Hex", loc: "Höllvania Mall (1999)" },
-        { name: "Cavia", loc: "Sanctum Anatomica, Deimos" },
-        { name: "The Holdfasts", loc: "Chrysalith, Zariman" },
-        { name: "Steel Meridian", loc: "Any Relay" },
-        { name: "Arbiters of Hexis", loc: "Any Relay" },
-        { name: "Cephalon Suda", loc: "Any Relay" },
-        { name: "The Perrin Sequence", loc: "Any Relay" },
-        { name: "Red Veil", loc: "Any Relay" },
-        { name: "New Loka", loc: "Any Relay" },
-        { name: "Ostron", loc: "Cetus, Earth" },
-        { name: "Solaris United", loc: "Fortuna, Venus" },
-        { name: "Vox Solaris", loc: "Fortuna (Little Duck)" },
-        { name: "Entrati", loc: "Necralisk, Deimos" },
-        { name: "Necraloid", loc: "Necralisk (Loid)" }
+        { name: "The Hex", loc: "Höllvania Mall" },
+        { name: "Cavia", loc: "Sanctum Anatomica" },
+        { name: "The Holdfasts", loc: "Zariman" },
+        { name: "Solaris United", loc: "Fortuna" },
+        { name: "Ostron", loc: "Cetus" },
+        { name: "Vox Solaris", loc: "Little Duck" },
+        { name: "Entrati", loc: "Necralisk" }
     ];
 
     let mastered = new Set();
     let subsumed = new Set();
     let syndicateRanks = {};
-    let spProgress = { completed: 0, total: 280 }; // Standard 2026 total
+    let spCount = 0;
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const data = JSON.parse(event.target.result);
-            mastered.clear();
-            subsumed.clear();
-            syndicateRanks = {};
+            mastered.clear(); subsumed.clear(); syndicateRanks = {}; spCount = 0;
 
-            // 1. Recursive Mastery & SP Scan
+            const normalize = (str) => {
+                if (!str) return "";
+                return str.split('/').pop().toUpperCase().replace(/POWERSUIT|WEAPON|PRIME|SKIN|ITEM|_/g, " ").trim();
+            };
+
             function scan(obj) {
                 for (let k in obj) {
                     if (obj[k] && typeof obj[k] === 'object') {
-                        if (obj[k].mastered === true || (obj[k].xp && obj[k].xp > 0)) {
-                            mastered.add(k.toUpperCase().replace(/_/g, " ").trim());
+                        if (obj[k].mastered || obj[k].xp > 0 || obj[k].maxed) {
+                            mastered.add(normalize(k));
                         }
-                        // Check for Steel Path node completion if AlecaFrame provides it
-                        if (k === "steelPath" || k === "SteelPath") {
-                            spProgress.completed = obj[k].completedNodes || obj[k].Progress || 0;
-                            spProgress.total = obj[k].totalNodes || 280;
-                        }
+                        if (k === "steelPath" || k === "SteelPath") spCount = obj[k].completedNodes || 0;
                         scan(obj[k]);
                     }
                 }
             }
             scan(data);
 
-            // 2. Subsume Scan
-            const subList = data.helminth?.subsumed || data.Helminth?.Subsumed || [];
-            subList.forEach(s => subsumed.add(s.toUpperCase()));
+            const subSrc = data.Helminth?.Subsumed || data.helminth?.subsumed || [];
+            subSrc.forEach(s => subsumed.add(normalize(s)));
 
-            // 3. Syndicate Scan
-            const synData = data.syndicates || data.Syndicates || {};
-            for (let s in synData) {
-                // AlecaFrame usually maps by name
-                syndicateRanks[s.toLowerCase()] = synData[s].rank || synData[s].level || 0;
-            }
+            const synSrc = data.Syndicates || data.syndicates || {};
+            for (let s in synSrc) { syndicateRanks[s.toLowerCase()] = synSrc[s].rank || synSrc[s].level || 0; }
 
-            document.getElementById('statusInfo').innerText = `✅ SYNCED: Detected ${mastered.size} items & ${spProgress.completed} SP nodes.`;
-            document.getElementById('fileStatus').innerText = "Data Loaded Successfully!";
+            document.getElementById('stat-m').innerText = mastered.size;
+            document.getElementById('stat-s').innerText = subsumed.size;
+            document.getElementById('stat-sp').innerText = spCount;
+            document.getElementById('fileStatus').innerText = "Matrix Calibrated.";
         };
         reader.readAsText(e.target.files[0]);
     });
@@ -119,56 +640,42 @@
     function generateObjective() {
         let pool = [];
 
-        // --- 1. FRAMES (Priority 100) ---
-        ALL_FRAMES.forEach(f => {
-            if (!mastered.has(f)) {
-                pool.push({ name: f, loc: "See Codex/Wiki", cat: "Frame", prio: 100, reason: "Missing Base Frame Mastery (6,000 pts)." });
-            } else if (!subsumed.has(f) && f !== "EXCALIBUR UMBRA") {
-                pool.push({ name: f, loc: "Farm 2nd Copy", cat: "Helminth", prio: 40, reason: "Mastered, but not yet fed to Helminth." });
+        MASTER_DB.forEach(item => {
+            const isMastered = mastered.has(item.name);
+            const isSubsumed = subsumed.has(item.name);
+
+            if (item.cat === "Frame") {
+                if (!isMastered) {
+                    pool.push({ ...item, prio: 100, reason: "Missing Base Frame Mastery (6,000 pts)." });
+                } else if (!isSubsumed && item.name !== "EXCALIBUR UMBRA") {
+                    pool.push({ ...item, cat: "Helminth", prio: 40, reason: "Mastered, but not yet subsumed." });
+                }
+            } else if (item.cat === "Weapon" && !isMastered) {
+                pool.push({ ...item, prio: 80, reason: "Missing Weapon Mastery (3,000 pts)." });
             }
         });
 
-        // --- 2. WEAPONS (Priority 80) ---
-        NON_RELIC_WEAPONS.forEach(w => {
-            if (!mastered.has(w)) {
-                pool.push({ name: w, loc: "Boss/Dojo/Quest", cat: "Weapon", prio: 80, reason: "Missing Weapon Mastery (3,000 pts)." });
-            }
-        });
-
-        // --- 3. SYNDICATES (Priority 30) ---
         SYNDICATES.forEach(s => {
             const rank = syndicateRanks[s.name.toLowerCase()] || 0;
-            if (rank < 5) {
-                pool.push({ name: s.name, loc: s.loc, cat: "Syndicate", prio: 30, reason: `Rank ${rank}/5. Max standing for completionist status.` });
-            }
+            if (rank < 5) pool.push({ name: s.name, loc: s.loc, cat: "Syndicate", prio: 30, reason: `Rank ${rank}/5. Goal: Rank 5.` });
         });
 
-        // --- 4. STEEL PATH (Priority 10) ---
-        if (spProgress.completed < spProgress.total) {
-            pool.push({ 
-                name: "Steel Path Node", 
-                loc: "Star Chart (Steel Path Mode)", 
-                cat: "Star Chart", 
-                prio: 10, 
-                reason: `Clear missing nodes. Progress: ${spProgress.completed}/${spProgress.total}.` 
-            });
+        if (spCount < 280) {
+            pool.push({ name: "Steel Path Node", loc: "Star Chart", cat: "Steel Path", prio: 10, reason: `Clear missing nodes. Current: ${spCount}/280.` });
         }
 
-        if (pool.length === 0) return alert("All targets achieved! You are a 100% Completionist in these categories.");
+        if (pool.length === 0) return alert("Everything is mastered!");
 
-        // Weighted Selection
         let weighted = [];
         pool.forEach(p => { for(let i=0; i<p.prio; i++) weighted.push(p); });
         const win = weighted[Math.floor(Math.random() * weighted.length)];
 
-        // Update UI
         document.getElementById('cCat').innerText = win.cat;
         document.getElementById('cName').innerText = win.name;
         document.getElementById('cLoc').innerText = win.loc;
         document.getElementById('cReason').innerText = win.reason;
         document.getElementById('pBadge').innerText = `Priority: ${win.prio}`;
         
-        // Dynamic Badge Colors
         const colors = { 100: '#d2a8ff', 80: '#79c0ff', 40: '#58a6ff', 30: '#ff7b72', 10: '#f2c94c' };
         document.getElementById('pBadge').style.borderColor = colors[win.prio];
         document.getElementById('result').style.borderLeftColor = colors[win.prio];
