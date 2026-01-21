@@ -2,50 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tenno Completionist Matrix</title>
+    <title>Tenno Mastery Matrix: Official Edition</title>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #21262d; --highlight: #58a6ff; --frame: #d2a8ff; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { max-width: 800px; width: 100%; }
-        .upload-zone { border: 2px dashed #30363d; padding: 30px; text-align: center; border-radius: 8px; margin-bottom: 20px; cursor: pointer; background: #0d1117; }
-        .btn-roll { background: var(--highlight); color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.1em; transition: 0.2s; }
-        .btn-roll:hover { background: #388bfd; }
+        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; background: #0d1117; }
+        .btn-roll { background: var(--btn); color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.1em; }
         #result { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; margin-top: 20px; display: none; border-left: 8px solid var(--frame); }
-        .category { text-transform: uppercase; font-size: 0.8em; color: #8b949e; letter-spacing: 1px; }
         .target { font-size: 2.2em; font-weight: bold; margin: 10px 0; color: #fff; }
-        .location { color: var(--accent); font-family: monospace; font-size: 1.2em; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
-        .reason { padding: 12px; background: rgba(210, 168, 255, 0.1); border-radius: 4px; border-left: 3px solid var(--frame); color: #d2a8ff; }
-        #statusInfo { margin-top: 10px; font-weight: bold; }
+        .location { color: var(--accent); font-family: monospace; font-size: 1.2em; margin-bottom: 15px; }
+        #statusInfo { margin-top: 10px; font-weight: bold; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Mastery Completionist</h1>
-    <div class="upload-zone" id="dropZone">
-        <p id="fileStatus">Select or Drop AlecaFrame JSON</p>
+    <h1>Mastery Matrix: Official Items</h1>
+    <div class="upload-zone">
+        <p>Drop AlecaFrame JSON here</p>
         <input type="file" id="fileInput" accept=".json">
-        <div id="statusInfo"></div>
+        <div id="statusInfo">Awaiting Data...</div>
     </div>
 
-    <button class="btn-roll" onclick="generateObjective()">GENERATE COMPLETIONIST GOAL</button>
+    <button class="btn-roll" onclick="generateObjective()">FIND REAL MISSING ITEM</button>
 
     <div id="result">
-        <div class="category" id="cCat">Category</div>
+        <div id="cCat" style="text-transform: uppercase; font-size: 0.8em; color: #8b949e;">Category</div>
         <div class="target" id="cName">Target</div>
         <div class="location" id="cLoc">Location</div>
-        <div class="reason" id="cReason">Reason</div>
+        <div id="cReason" style="padding: 10px; background: rgba(210, 168, 255, 0.1); border-radius: 4px;">Reason</div>
     </div>
 </div>
 
 <script>
-    // --- DATABASE: BASE ITEMS (The script will automatically check for Prime/Vandal variants) ---
-    const BASE_DATA = {
-        frames: ["ATLAS", "BARUUK", "CALIBAN", "CHROMA", "CITRINE", "DAGATH", "DANTE", "EMBER", "EXCALIBUR", "FROST", "GAUSS", "GRENDEL", "GYRE", "HARROW", "HILDRYN", "HYDROID", "IVARA", "JADE", "KHORA", "KULLERVO", "LAVOS", "MAG", "MESA", "NEKROS", "NEZHA", "NIDUS", "NOVA", "NYX", "OBERON", "PROTEA", "QORVEX", "REVENANT", "RHINO", "SARYN", "SEVAGOTH", "STYANAX", "TITANIA", "TRINITY", "VALKYR", "VAUBAN", "VORUNA", "WISP", "WUKONG", "XAKU", "YARELI", "ZEPHYR"],
-        weapons: ["IGNIS", "BRATON", "LATO", "STRUN", "FURAX", "LEX", "BO", "KUNAI", "FURIS", "AFURIS", "SKANA", "BURSTON", "AKBOLTO", "BOLTO", "BOLTOR", "GORGON", "GRAKATA", "SILVA & AEGIS", "SYBARIS", "TIGRIS", "CERNOS", "NIKANA"]
-    };
-
-    const VARIANTS = ["PRIME", "VANDAL", "WRAITH", "PRISMA", "KUVA", "TENET", "UMBRA", "DEX", "MUTALIST"];
+    // --- OFFICIAL NON-RELIC DATABASE ---
+    // This list only contains REAL items. 
+    const OFFICIAL_DB = [
+        { name: "ATLAS", loc: "Jordas Precept", cat: "Frame" },
+        { name: "BARUUK", loc: "Vox Solaris (Little Duck)", cat: "Frame" },
+        { name: "CALIBAN", loc: "Narmer Bounties", cat: "Frame" },
+        { name: "CITRINE", loc: "Tyana Pass (Mars)", cat: "Frame" },
+        { name: "DAGATH", loc: "Abyssal Zone", cat: "Frame" },
+        { name: "DANTE", loc: "Armatus (Deimos)", cat: "Frame" },
+        { name: "EXCALIBUR UMRA", loc: "The Sacrifice Quest", cat: "Frame" },
+        { name: "GRENDEL", loc: "Arbitration Missions", cat: "Frame" },
+        { name: "GYRE", loc: "Zariman Bounties", cat: "Frame" },
+        { name: "KULLERVO", loc: "Duviri (Kullervo's Hold)", cat: "Frame" },
+        { name: "PROTEA", loc: "Granum Void", cat: "Frame" },
+        { name: "SEVAGOTH", loc: "Railjack Void Storms", cat: "Frame" },
+        { name: "VORUNA", loc: "Conjunction Survival (Lua)", cat: "Frame" },
+        { name: "WISP", loc: "Ropalolyst (Jupiter)", cat: "Frame" },
+        { name: "IGNIS WRAITH", loc: "Dojo (Chem Lab)", cat: "Weapon" },
+        { name: "BUBONICO", loc: "Dojo (Bio Lab)", cat: "Weapon" },
+        { name: "CEDO", loc: "Father (Necralisk)", cat: "Weapon" },
+        { name: "PHENMOR", loc: "Cavalero (Zariman)", cat: "Weapon" },
+        { name: "NATARUK", loc: "The New War Quest", cat: "Weapon" },
+        { name: "XORIS", loc: "The Deadlock Protocol", cat: "Weapon" },
+        { name: "DEX FURIS", loc: "Anniversary Gift (March)", cat: "Weapon" },
+        { name: "DEX DAKRA", loc: "Anniversary Gift (March)", cat: "Weapon" },
+        { name: "DEX SYBARIS", loc: "Anniversary Gift (March)", cat: "Weapon" }
+        // ... (You can add any other specific real weapons you are hunting here)
+    ];
 
     let mastered = new Set();
     let subsumed = new Set();
@@ -53,89 +71,47 @@
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const reader = new FileReader();
         reader.onload = (event) => {
-            try {
-                const data = JSON.parse(event.target.result);
-                mastered.clear();
-                subsumed.clear();
+            const data = JSON.parse(event.target.result);
+            mastered.clear();
 
-                // FIX: AlecaFrame structure mapping
-                // Check if mastery is at top level or inside a 'Mastery' object
-                const masteryList = data.mastery || data.Mastery || {};
-                
-                Object.keys(masteryList).forEach(itemName => {
-                    // Aleca uses the full name as the key. We clean it and add it.
-                    mastered.add(itemName.toUpperCase().trim());
-                });
-
-                // Check for Helminth subsumes
-                const helminth = data.helminth || data.Helminth || {};
-                const subsumeList = helminth.subsumed || helminth.Subsumed || [];
-                subsumeList.forEach(s => subsumed.add(s.toUpperCase().trim()));
-
-                const status = document.getElementById('statusInfo');
-                status.innerText = `✅ SYNC COMPLETE: Found ${mastered.size} Mastered Items.`;
-                status.style.color = "#2ea043";
-            } catch (err) {
-                console.error(err);
-                alert("Could not read JSON structure.");
+            // REFINED PARSER: Iterates through Aleca's complex objects
+            // We search for anything that looks like an item with XP or a 'mastered' flag
+            function searchMastery(obj) {
+                for (let key in obj) {
+                    if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        // If the object has 'mastered: true' or 'xp' > 0
+                        if (obj[key].mastered === true || (obj[key].xp && obj[key].xp > 0)) {
+                            mastered.add(key.toUpperCase().replace(/_/, " "));
+                        }
+                        searchMastery(obj[key]);
+                    }
+                }
             }
+            searchMastery(data);
+
+            // Also check standard helminth path
+            const subsumeList = data.helminth?.subsumed || [];
+            subsumeList.forEach(s => subsumed.add(s.toUpperCase()));
+
+            document.getElementById('statusInfo').innerText = `✅ DATA SYNCED: ${mastered.size} Items Found.`;
         };
         reader.readAsText(e.target.files[0]);
     });
 
     function generateObjective() {
-        let pool = [];
+        const pool = OFFICIAL_DB.filter(item => !mastered.has(item.name));
 
-        // 1. Process Frames & Variants
-        BASE_DATA.frames.forEach(base => {
-            // Check Base Frame
-            if (!mastered.has(base)) {
-                pool.push({ cat: "Frame Mastery", name: base, loc: "See Codex/Boss", reason: "Base frame mastery missing.", weight: 100 });
-            } else if (!subsumed.has(base)) {
-                pool.push({ cat: "Helminth", name: base, loc: "See Codex/Boss", reason: "Mastered, but not yet Subsumed.", weight: 50 });
-            }
-
-            // Check Variants (Ex: Khora Prime)
-            VARIANTS.forEach(v => {
-                let vName = `${base} ${v}`;
-                if (v === "PRIME") vName = `${base} PRIME`; // Standardize
-                
-                // Special check for things like "Mutalist Alad V" vs "Mutalist Cernos"
-                if (mastered.has(vName)) return; 
-                
-                // We add variants to the pool with a high weight because they are mastery
-                // Note: This logic only adds them if they exist in the game.
-                // For a true completionist tool, you'd eventually want a full list of every weapon.
-                pool.push({ cat: "Variant Mastery", name: vName, loc: "Relics / Special", reason: "Missing unique variant mastery.", weight: 80 });
-            });
-        });
-
-        // 2. Process Weapons
-        BASE_DATA.weapons.forEach(base => {
-            if (!mastered.has(base)) pool.push({ cat: "Weapon Mastery", name: base, loc: "Market/Dojo", reason: "Base weapon mastery missing.", weight: 40 });
-            
-            VARIANTS.forEach(v => {
-                let vName = `${base} ${v}`;
-                if (!mastered.has(vName)) {
-                    pool.push({ cat: "Weapon Variant", name: vName, loc: "Various", reason: "Missing unique variant mastery.", weight: 30 });
-                }
-            });
-        });
-
-        // 3. Selection
-        let weighted = [];
-        pool.forEach(p => { for(let i=0; i<p.weight; i++) weighted.push(p); });
-        const win = weighted[Math.floor(Math.random() * weighted.length)];
-
-        if (!win) {
-            alert("No missing items found in this database category!");
+        if (pool.length === 0) {
+            alert("No missing items from the official list found!");
             return;
         }
+
+        const win = pool[Math.floor(Math.random() * pool.length)];
 
         document.getElementById('cCat').innerText = win.cat;
         document.getElementById('cName').innerText = win.name;
         document.getElementById('cLoc').innerText = win.loc;
-        document.getElementById('cReason').innerText = win.reason;
+        document.getElementById('cReason').innerText = `This is a verified real ${win.cat} you are currently missing.`;
         document.getElementById('result').style.display = 'block';
     }
 </script>
