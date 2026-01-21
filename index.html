@@ -2,67 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tenno Mastery Matrix: Official Edition</title>
+    <title>Tenno Mastery Matrix 2026</title>
     <style>
-        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #1f6feb; --frame: #d2a8ff; --relic: #f2c94c; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { max-width: 800px; width: 100%; }
-        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; background: #0d1117; }
-        .btn-roll { background: var(--btn); color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.1em; }
-        #result { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; margin-top: 20px; display: none; border-left: 8px solid var(--frame); }
-        .target { font-size: 2.2em; font-weight: bold; margin: 10px 0; color: #fff; }
-        .location { color: var(--accent); font-family: monospace; font-size: 1.2em; margin-bottom: 15px; }
-        #statusInfo { margin-top: 10px; font-weight: bold; color: #8b949e; }
+        .container { max-width: 900px; width: 100%; }
+        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px; background: #0d1117; cursor: pointer; }
+        .btn-roll { background: var(--btn); color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.2em; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .btn-roll:hover { background: #388bfd; transform: translateY(-2px); }
+        #result { background: var(--card); border: 1px solid #30363d; padding: 30px; border-radius: 15px; margin-top: 25px; display: none; border-left: 10px solid var(--frame); position: relative; }
+        .target { font-size: 2.5em; font-weight: bold; margin: 10px 0; color: #fff; letter-spacing: -1px; }
+        .location { color: var(--accent); font-family: 'Courier New', monospace; font-size: 1.3em; margin-bottom: 20px; display: block; }
+        .priority-badge { position: absolute; top: 20px; right: 20px; padding: 5px 12px; border-radius: 20px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+        #statusInfo { margin-top: 15px; font-size: 0.9em; color: #8b949e; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Mastery Matrix: Official Items</h1>
-    <div class="upload-zone">
-        <p>Drop AlecaFrame JSON here</p>
-        <input type="file" id="fileInput" accept=".json">
-        <div id="statusInfo">Awaiting Data...</div>
+    <h1>Tenno Mastery Matrix</h1>
+    
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <p id="fileStatus">Click to Upload <strong>AlecaFrame JSON</strong></p>
+        <input type="file" id="fileInput" accept=".json" style="display:none">
+        <div id="statusInfo">Status: Offline (Using Random Defaults)</div>
     </div>
 
-    <button class="btn-roll" onclick="generateObjective()">FIND REAL MISSING ITEM</button>
+    <button class="btn-roll" onclick="generateObjective()">GENERATE NEXT GOAL</button>
 
     <div id="result">
-        <div id="cCat" style="text-transform: uppercase; font-size: 0.8em; color: #8b949e;">Category</div>
-        <div class="target" id="cName">Target</div>
-        <div class="location" id="cLoc">Location</div>
-        <div id="cReason" style="padding: 10px; background: rgba(210, 168, 255, 0.1); border-radius: 4px;">Reason</div>
+        <span id="pBadge" class="priority-badge">Priority</span>
+        <div id="cCat" style="color: #8b949e; text-transform: uppercase; font-size: 0.9em;">Category</div>
+        <div class="target" id="cName">Target Item</div>
+        <div class="location" id="cLoc">Source Location</div>
+        <div id="cReason" style="padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; line-height: 1.5;">Reasoning</div>
     </div>
 </div>
 
 <script>
-    // --- OFFICIAL NON-RELIC DATABASE ---
-    // This list only contains REAL items. 
-    const OFFICIAL_DB = [
-        { name: "ATLAS", loc: "Jordas Precept", cat: "Frame" },
-        { name: "BARUUK", loc: "Vox Solaris (Little Duck)", cat: "Frame" },
-        { name: "CALIBAN", loc: "Narmer Bounties", cat: "Frame" },
-        { name: "CITRINE", loc: "Tyana Pass (Mars)", cat: "Frame" },
-        { name: "DAGATH", loc: "Abyssal Zone", cat: "Frame" },
+    // --- JAN 2026 PRIME RESURGENCE (Rotation 2) ---
+    // Priority: Middle (60)
+    const UNVAULTED_DB = [
+        { name: "NEKROS PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "HARROW PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "SARYN PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "VALKYR PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "IVARA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "OBERON PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "GARUDA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "KHORA PRIME", loc: "Varzia (Aya Relics)", cat: "Unvaulted" },
+        { name: "TIGRIS PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
+        { name: "NIKANA PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
+        { name: "VENKA PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" },
+        { name: "SYBARIS PRIME", loc: "Relic Farm", cat: "Unvaulted Weapon" }
+    ];
+
+    // --- STATIC MASTERY DB (Non-Relic) ---
+    const STATIC_DB = [
+        // Frames (100)
         { name: "DANTE", loc: "Armatus (Deimos)", cat: "Frame" },
-        { name: "EXCALIBUR UMRA", loc: "The Sacrifice Quest", cat: "Frame" },
-        { name: "GRENDEL", loc: "Arbitration Missions", cat: "Frame" },
-        { name: "GYRE", loc: "Zariman Bounties", cat: "Frame" },
+        { name: "QORVEX", loc: "Effervo (Deimos)", cat: "Frame" },
+        { name: "STYANAX", loc: "Kahl's Garrison", cat: "Frame" },
+        { name: "VORUNA", loc: "Lua Conjunction", cat: "Frame" },
+        { name: "CITRINE", loc: "Tyana Pass (Mars)", cat: "Frame" },
         { name: "KULLERVO", loc: "Duviri (Kullervo's Hold)", cat: "Frame" },
-        { name: "PROTEA", loc: "Granum Void", cat: "Frame" },
-        { name: "SEVAGOTH", loc: "Railjack Void Storms", cat: "Frame" },
-        { name: "VORUNA", loc: "Conjunction Survival (Lua)", cat: "Frame" },
-        { name: "WISP", loc: "Ropalolyst (Jupiter)", cat: "Frame" },
-        { name: "IGNIS WRAITH", loc: "Dojo (Chem Lab)", cat: "Weapon" },
-        { name: "BUBONICO", loc: "Dojo (Bio Lab)", cat: "Weapon" },
-        { name: "CEDO", loc: "Father (Necralisk)", cat: "Weapon" },
-        { name: "PHENMOR", loc: "Cavalero (Zariman)", cat: "Weapon" },
-        { name: "NATARUK", loc: "The New War Quest", cat: "Weapon" },
-        { name: "XORIS", loc: "The Deadlock Protocol", cat: "Weapon" },
-        { name: "DEX FURIS", loc: "Anniversary Gift (March)", cat: "Weapon" },
-        { name: "DEX DAKRA", loc: "Anniversary Gift (March)", cat: "Weapon" },
-        { name: "DEX SYBARIS", loc: "Anniversary Gift (March)", cat: "Weapon" }
-        // ... (You can add any other specific real weapons you are hunting here)
+        { name: "DAGATH", loc: "Abyssal Zone", cat: "Frame" },
+        // Dojo Weapons (80)
+        { name: "IGNIS WRAITH", loc: "Chem Lab", cat: "Dojo" },
+        { name: "BUBONICO", loc: "Bio Lab", cat: "Dojo" },
+        { name: "PHENMOR", loc: "Zariman (Cavalero)", cat: "Zariman" },
+        { name: "LAETUM", loc: "Zariman (Cavalero)", cat: "Zariman" },
+        // Syndicates (10)
+        { name: "CAVIA", loc: "Sanctum Anatomica", cat: "Syndicate" },
+        { name: "HOLDFASTS", loc: "Zariman", cat: "Syndicate" },
+        { name: "SOLARIS UNITED", loc: "Fortuna", cat: "Syndicate" }
     ];
 
     let mastered = new Set();
@@ -73,45 +86,69 @@
         reader.onload = (event) => {
             const data = JSON.parse(event.target.result);
             mastered.clear();
-
-            // REFINED PARSER: Iterates through Aleca's complex objects
-            // We search for anything that looks like an item with XP or a 'mastered' flag
-            function searchMastery(obj) {
-                for (let key in obj) {
-                    if (typeof obj[key] === 'object' && obj[key] !== null) {
-                        // If the object has 'mastered: true' or 'xp' > 0
-                        if (obj[key].mastered === true || (obj[key].xp && obj[key].xp > 0)) {
-                            mastered.add(key.toUpperCase().replace(/_/, " "));
+            
+            // DEEP SCAN: AlecaFrame often nests items inside sub-objects
+            function scan(obj) {
+                for (let k in obj) {
+                    if (obj[k] && typeof obj[k] === 'object') {
+                        // Check for Mastery/Rank flags
+                        if (obj[k].mastered === true || obj[k].maxed === true || (obj[k].xp && obj[k].xp > 0)) {
+                            mastered.add(k.toUpperCase().replace(/_/g, " ").trim());
                         }
-                        searchMastery(obj[key]);
+                        scan(obj[k]);
                     }
                 }
             }
-            searchMastery(data);
+            scan(data);
+            
+            // Standard Helminth check
+            const subList = data.helminth?.subsumed || data.Helminth?.Subsumed || [];
+            subList.forEach(s => subsumed.add(s.toUpperCase()));
 
-            // Also check standard helminth path
-            const subsumeList = data.helminth?.subsumed || [];
-            subsumeList.forEach(s => subsumed.add(s.toUpperCase()));
-
-            document.getElementById('statusInfo').innerText = `✅ DATA SYNCED: ${mastered.size} Items Found.`;
+            document.getElementById('statusInfo').innerText = `✅ SYNCED: Detected ${mastered.size} Mastered items.`;
+            document.getElementById('fileStatus').innerText = "Account Data Loaded!";
         };
         reader.readAsText(e.target.files[0]);
     });
 
     function generateObjective() {
-        const pool = OFFICIAL_DB.filter(item => !mastered.has(item.name));
+        let pool = [];
 
-        if (pool.length === 0) {
-            alert("No missing items from the official list found!");
-            return;
-        }
+        // 1. Static Masterables (Prio: High 100/80)
+        STATIC_DB.forEach(i => {
+            if (!mastered.has(i.name)) {
+                let prio = i.cat === "Frame" ? 100 : 80;
+                if (i.cat === "Syndicate") prio = 10;
+                pool.push({ ...i, prio: prio, reason: `Missing base ${i.cat} Mastery.` });
+            }
+        });
 
-        const win = pool[Math.floor(Math.random() * pool.length)];
+        // 2. Unvaulted Relics (Prio: Middle 60)
+        UNVAULTED_DB.forEach(i => {
+            if (!mastered.has(i.name)) {
+                pool.push({ ...i, prio: 60, reason: "Currently UNVAULTED. Farm Varzia/Relics now!" });
+            }
+        });
+
+        // 3. Subsume check (Prio: 40)
+        STATIC_DB.filter(i => i.cat === "Frame").forEach(f => {
+            if (mastered.has(f.name) && !subsumed.has(f.name)) {
+                pool.push({ ...f, prio: 40, cat: "Helminth", reason: "Mastered but not yet fed to Helminth." });
+            }
+        });
+
+        if (pool.length === 0) return alert("All current database items are mastered!");
+
+        // Weighted Selection
+        let weighted = [];
+        pool.forEach(p => { for(let i=0; i<p.prio; i++) weighted.push(p); });
+        const win = weighted[Math.floor(Math.random() * weighted.length)];
 
         document.getElementById('cCat').innerText = win.cat;
         document.getElementById('cName').innerText = win.name;
         document.getElementById('cLoc').innerText = win.loc;
-        document.getElementById('cReason').innerText = `This is a verified real ${win.cat} you are currently missing.`;
+        document.getElementById('cReason').innerText = win.reason;
+        document.getElementById('pBadge').innerText = `Weight: ${win.prio}`;
         document.getElementById('result').style.display = 'block';
     }
 </script>
