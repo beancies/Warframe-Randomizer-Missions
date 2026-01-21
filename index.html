@@ -2,336 +2,190 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenno Mastery Director</title>
+    <title>Tenno Progression Matrix</title>
     <style>
-        :root { --bg: #0d1117; --card-bg: #161b22; --text: #c9d1d9; --accent: #238636; --border: #30363d; --btn: #1f6feb; --frame: #d2a8ff; --wep: #79c0ff; --other: #ffa657; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
-        
-        .container { max-width: 750px; width: 100%; text-align: center; }
-        h1 { margin-bottom: 5px; color: #fff; letter-spacing: 1px; }
-        .subtitle { color: #8b949e; margin-bottom: 25px; font-size: 0.9em; }
-        
-        /* Upload Box */
-        .upload-box { 
-            border: 2px dashed var(--border); background: #0d1117; padding: 30px; 
-            border-radius: 8px; transition: border-color 0.2s; position: relative;
-        }
-        .upload-box:hover { border-color: var(--btn); }
-        .file-status { margin-top: 15px; font-weight: 600; color: #8b949e; }
-        
-        /* Button */
-        .btn-main {
-            background: var(--btn); color: white; border: none; padding: 16px 40px; 
-            font-size: 1.1rem; font-weight: bold; border-radius: 6px; cursor: pointer;
-            margin: 30px 0; transition: transform 0.1s, background 0.2s;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-        }
-        .btn-main:hover { background: #388bfd; transform: translateY(-2px); }
-        .btn-main:active { transform: translateY(0); }
-        
-        /* Mission Card */
-        #card {
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
-            padding: 0; overflow: hidden; display: none; text-align: left;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.6); animation: slideUp 0.3s ease-out;
-        }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .card-header { padding: 15px 25px; font-size: 0.85em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7); display: flex; justify-content: space-between; }
-        .card-body { padding: 5px 25px 25px 25px; }
-        .target-name { font-size: 2.2em; font-weight: 800; color: #fff; margin: 0; line-height: 1.1; }
-        .target-loc { font-size: 1.2em; color: var(--accent); margin: 8px 0 15px 0; font-family: monospace; }
-        .reason-box { background: rgba(56, 139, 253, 0.1); border-left: 4px solid var(--btn); padding: 12px; border-radius: 0 4px 4px 0; color: #a5d6ff; font-size: 0.95em; }
-        
-        /* Type Colors */
-        .type-warframe { background: rgba(210, 168, 255, 0.15); color: var(--frame); }
-        .type-weapon { background: rgba(121, 192, 255, 0.15); color: var(--wep); }
-        .type-other { background: rgba(255, 166, 87, 0.15); color: var(--other); }
-
-        .tags { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-        .tag { background: #30363d; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; color: #c9d1d9; border: 1px solid #444; }
-
-        .log-area { text-align: left; margin-top: 30px; font-family: monospace; color: #444; font-size: 0.8em; max-height: 100px; overflow-y: auto; }
+        :root { --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --accent: #2ea043; --btn: #21262d; --highlight: #58a6ff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 800px; width: 100%; }
+        .upload-zone { border: 2px dashed #30363d; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; cursor: pointer; }
+        .btn-roll { background: var(--highlight); color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; width: 100%; cursor: pointer; font-size: 1.1em; }
+        #result { background: var(--card); border: 1px solid #30363d; padding: 25px; border-radius: 12px; margin-top: 20px; display: none; border-left: 8px solid var(--highlight); }
+        .category { text-transform: uppercase; font-size: 0.8em; color: #8b949e; letter-spacing: 1px; }
+        .target { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .location { color: var(--accent); font-family: monospace; font-size: 1.1em; }
+        .reason { margin-top: 15px; padding: 10px; background: rgba(88, 166, 255, 0.1); border-radius: 4px; border-left: 3px solid var(--highlight); }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>MASTERY DIRECTOR</h1>
-    <div class="subtitle">Prioritized Progression System</div>
-
-    <div class="upload-box">
-        <p style="margin:0">Drop <strong>AlecaFrame Export (.json)</strong> here</p>
-        <input type="file" id="fileInput" accept=".json" style="margin-top:10px; opacity:0.7;">
-        <div id="fileStatus" class="file-status">Waiting for data...</div>
+    <h1>Progression Matrix</h1>
+    <div class="upload-zone" id="dropZone">
+        <p>Drop <strong>AlecaFrame JSON</strong> here</p>
+        <input type="file" id="fileInput" accept=".json">
+        <div id="fileStatus">Offline Mode (Random)</div>
     </div>
 
-    <button class="btn-main" id="rollBtn" onclick="generateProtocol()">CALCULATE NEXT OBJECTIVE</button>
+    <button class="btn-roll" onclick="generateObjective()">GENERATE OBJECTIVE</button>
 
-    <div id="card">
-        <div class="card-header" id="cHeader">CATEGORY</div>
-        <div class="card-body">
-            <div class="target-name" id="cTarget">Target</div>
-            <div class="target-loc" id="cNode">Location</div>
-            <div class="reason-box" id="cReason">Reason</div>
-            <div class="tags" id="cTags"></div>
-        </div>
+    <div id="result">
+        <div class="category" id="cCat">Category</div>
+        <div class="target" id="cName">Target</div>
+        <div class="location" id="cLoc">Location</div>
+        <div class="reason" id="cReason">Reason</div>
     </div>
-    
-    <div class="log-area" id="debugLog"></div>
 </div>
 
 <script>
-    // --- DATABASE: Dedicated Drops (Only hard-to-find items listed here) ---
-    // If it's not here, we assume it's a Prime (Fissure) or Dojo (Lab) item.
-    
-    const DB_FRAMES = {
-        "KHORA": { node: "Sanctuary Onslaught", planet: "Simaris", tags: ["Zone 8", "C-Rot"] },
-        "NIDUS": { node: "Oestrus", planet: "Eris", tags: ["Infested Salvage", "C-Rot"] },
-        "HARROW": { node: "Defection", planet: "Kuva Fortress", tags: ["C-Rot", "Painful"] },
-        "IVARA": { node: "Spy Missions", planet: "All Planets (T3)", tags: ["Stealth", "Perfect Hacking"] },
-        "PROTEA": { node: "Granum Void", planet: "Corpus Ship", tags: ["Golden Hand", "Zenith Coin"] },
-        "SEVAGOTH": { node: "Void Storms", planet: "Railjack", tags: ["Relics", "Holokeys"] },
-        "ASH": { node: "Railjack Defense", planet: "Venus Proxima", tags: ["Rotation C", "Railjack"] },
-        "OBERON": { node: "Railjack Bonus", planet: "Earth Proxima", tags: ["Caches", "Points of Interest"] },
-        "CITRINE": { node: "Tyana Pass", planet: "Mars", tags: ["Mirror Defense", "Crystal"] },
-        "VORUNA": { node: "Yuvarium", planet: "Lua", tags: ["Conj. Survival", "Thrax"] },
-        "KULLERVO": { node: "The Duviri Experience", planet: "Duviri", tags: ["Kullervo's Hold"] },
-        "DANTE": { node: "Armatus", planet: "Deimos", tags: ["Disruption", "Vessel"] },
-        "JADE": { node: "Brutus", planet: "Uranus", tags: ["Ascension", "Motes"] },
-        "WISP": { node: "Ropalolyst", planet: "Jupiter", tags: ["Boss", "Sentient"] },
-        "GAUSS": { node: "Kelpie", planet: "Sedna", tags: ["Disruption", "Speed"] },
-        "GRENDEL": { node: "Arbitrations", planet: "Alerts", tags: ["Vitus Essence", "Locators"] },
-        "STYANAX": { node: "Kahl's Garrison", planet: "Drifter Camp", tags: ["Weekly", "Stock"] },
-        "GYRE": { node: "Zariman Bounties", planet: "Zariman", tags: ["Bounties", "Angels"] },
-        "CALIBAN": { node: "Narmer Bounties", planet: "Cetus/Fortuna", tags: ["Day/Night", "Isoplasts"] },
-        "YARELI": { node: "Bash Lab", planet: "Dojo", tags: ["Research", "Ventkids"] },
-        "QORVEX": { node: "Sanctum Anatomica", planet: "Deimos", tags: ["Bounties", "Voca"] },
-        "DAGATH": { node: "Abyssal Zone", planet: "Ceres", tags: ["Beacons", "Syndicate"] }
+    // --- DATABASE: NON-RELIC ITEMS ---
+    const DB = {
+        frames: {
+            "ATLAS": "Jordas Precept (Eris Boss)",
+            "BARUUK": "Little Duck (Vox Solaris)",
+            "CALIBAN": "Narmer Bounties (Cetus/Fortuna)",
+            "CHROMA": "Quests / Junctions",
+            "CITRINE": "Tyana Pass (Mars)",
+            "DAGATH": "Abyssal Zone (Syndicate Beacons)",
+            "DANTE": "Armatus (Deimos Disruption)",
+            "EMBER": "Tethys (Saturn Boss)",
+            "EXCALIBUR": "War (Mars Boss)",
+            "FROST": "Exta (Ceres Boss)",
+            "GAUSS": "Kelpie (Sedna Disruption)",
+            "GRENDEL": "Arbitration Locators",
+            "GYRE": "Zariman Bounties",
+            "HARROW": "Defection / Kuva Survival",
+            "HILDRYN": "Exploiter Orb (Vox Solaris)",
+            "HYDROID": "Oro (Earth Boss)",
+            "IVARA": "Spy Missions (All Tiers)",
+            "JADE": "Brutus (Uranus Ascension)",
+            "KHORA": "Sanctuary Onslaught",
+            "KULLERVO": "Duviri (Kullervo's Hold)",
+            "LAVOS": "Father (Entrati)",
+            "MAG": "Iliad (Phobos Boss)",
+            "MESA": "Mutalist Alad V (Eris)",
+            "NEKROS": "Magnacidium (Deimos Boss)",
+            "NEZHA": "Tenno Lab (Dojo)",
+            "NIDUS": "Oestrus (Eris Salvage)",
+            "NOVA": "Naamah (Europa Boss)",
+            "NYX": "Phorid Manifestations",
+            "OBERON": "Railjack Points of Interest",
+            "PROTEA": "Granum Void (Corpus Ships)",
+            "QORVEX": "Sanctum Anatomica Bounties",
+            "REVENANT": "Nakak (Cetus Quest)",
+            "RHINO": "Fossa (Venus Boss)",
+            "SARYN": "Merrow (Sedna Boss)",
+            "SEVAGOTH": "Void Storms (Railjack)",
+            "STYANAX": "Chipper (Kahl's Garrison)",
+            "TITANIA": "Silver Grove Quest",
+            "TRINITY": "Ambulas (Pluto Boss)",
+            "VALKYR": "Themisto (Jupiter Boss)",
+            "VAUBAN": "Nightwave Store",
+            "VORUNA": "Yuvarium (Lua Survival)",
+            "WISP": "Ropalolyst (Jupiter Boss)",
+            "WUKONG": "Tenno Lab (Dojo)",
+            "XAKU": "Father (Entrati Bounties)",
+            "YARELI": "Ventkids (Bash Lab)",
+            "ZEPHYR": "Tenno Lab (Dojo)"
+        },
+        weapons: {
+            "IGNIS WRAITH": "Chem Lab (Dojo)",
+            "BUBONICO": "Bio Lab (Dojo)",
+            "CEDO": "Father (Entrati)",
+            "PHENMOR": "Cavalero (Zariman)",
+            "LAETUM": "Cavalero (Zariman)",
+            "FELARX": "Cavalero (Zariman)",
+            "NATARUK": "New War Quest",
+            "EPITAPH": "Railjack Void Storms",
+            "DESPAIR": "Stalker Drop",
+            "DREAD": "Stalker Drop",
+            "HATE": "Stalker Drop",
+            "WAR": "Shadow Stalker",
+            "BROKEN WAR": "Second Dream Quest",
+            "XORIS": "Deadlock Protocol Quest",
+            "SHEEDU": "Erra Quest / Symbilists",
+            "KORUM": "Narmer Bounties",
+            "VERICRES": "Tenno Live Event / Market",
+            "AMPREX": "Energy Lab (Dojo)",
+            "LENZ": "Energy Lab (Dojo)",
+            "ARCA PLASMOR": "Energy Lab (Dojo)",
+            "LANKA": "Energy Lab (Dojo)"
+        },
+        syndicates: {
+            "OSTRON": "Cetus (Earth)",
+            "SOLARIS UNITED": "Fortuna (Venus)",
+            "ENTRATI": "Necralisk (Deimos)",
+            "HOLDFASTS": "Chrysalith (Zariman)",
+            "CAVIA": "Sanctum Anatomica (Deimos)",
+            "VOX SOLARIS": "Little Duck (Fortuna)",
+            "NECRALOID": "Loid (Necralisk)"
+        }
     };
 
-    const DB_WEAPONS = {
-        "IGNIS WRAITH": { loc: "Clan Dojo (Chem Lab)", type: "Dojo" },
-        "ARCA PLASMOR": { loc: "Clan Dojo (Energy Lab)", type: "Dojo" },
-        "LANKA": { loc: "Clan Dojo (Energy Lab)", type: "Dojo" },
-        "AMPREX": { loc: "Clan Dojo (Energy Lab)", type: "Dojo" },
-        "HEMA": { loc: "Clan Dojo (Bio Lab)", type: "Dojo" },
-        "PARACESIS": { loc: "Prologue Quest", type: "Quest" },
-        "XORIS": { loc: "Deadlock Protocol", type: "Quest" },
-        "BROKEN WAR": { loc: "Second Dream", type: "Quest" },
-        "MITER": { loc: "Exta (Ceres)", type: "Boss Drop (Lech Kril)" },
-        "TWIN GREMLINS": { loc: "Iliad (Phobos)", type: "Boss Drop (Vor/Kril)" },
-        "SEER": { loc: "Tolstoj (Mercury)", type: "Boss Drop (Vor)" },
-        "KOHM": { loc: "Market Blueprint", type: "Market" },
-        "HEK": { loc: "Market Blueprint", type: "Market" },
-        "CEDO": { loc: "Father (Necralisk)", type: "Syndicate" },
-        "TRUMNA": { loc: "Father (Necralisk)", type: "Syndicate" },
-        "PHENMOR": { loc: "Cavalero (Zariman)", type: "Incarnon" },
-        "FELARX": { loc: "Cavalero (Zariman)", type: "Incarnon" },
-        "LAETUM": { loc: "Cavalero (Zariman)", type: "Incarnon" },
-        "NATARUK": { loc: "New War", type: "Quest" },
-        "RUVIOX": { loc: "Armatus (Deimos)", type: "Disruption" },
-        "ONOS": { loc: "Armatus (Deimos)", type: "Disruption" }
-    };
+    let owned = new Set();
+    let mastered = new Set();
+    let subsumed = new Set();
+    let syndicateRanks = {};
 
-    const DB_OTHER = {
-        "VOIDRIG": { loc: "Isolation Vaults", planet: "Deimos" },
-        "BONEWIDOW": { loc: "Isolation Vaults", planet: "Deimos" },
-        "SMEETA KAVAT": { loc: "Derelict Scan / Market", planet: "Orbiter" },
-        "PANZER VULPAPHYLA": { loc: "Son", planet: "Deimos" },
-        "AMEISHA": { loc: "Tenno Lab", planet: "Dojo" },
-        "ITZAL": { loc: "Tenno Lab", planet: "Dojo" },
-        "HELIOS": { loc: "Energy Lab", planet: "Dojo" }
-    };
-
-    let ownedItems = new Set();
-    let isDataLoaded = false;
-    let missingStats = { frames: 0, weapons: 0, other: 0 };
-
-    // --- 1. PARSE JSON ---
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                let rawList = [];
+        reader.onload = (event) => {
+            const data = JSON.parse(event.target.result);
+            // Parse inventory
+            (data.inventory || data).forEach(i => { if(i.Name) owned.add(i.Name.toUpperCase()); });
+            // Parse mastery
+            if(data.mastery) Object.keys(data.mastery).forEach(k => mastered.add(k.toUpperCase()));
+            // Parse subsumes
+            if(data.helminth?.subsumed) data.helminth.subsumed.forEach(s => subsumed.add(s.toUpperCase()));
+            // Parse syndicates
+            if(data.syndicates) syndicateRanks = data.syndicates;
 
-                // Smart Detection of Aleca format
-                if (Array.isArray(data)) rawList = data;
-                else if (data.inventory) rawList = data.inventory;
-                else if (data.Components) rawList = data.Components; 
-
-                // Process Inventory
-                rawList.forEach(item => {
-                    if (item.Name) ownedItems.add(item.Name.toUpperCase());
-                    if (item.uniqueName) ownedItems.add(item.uniqueName.toUpperCase());
-                    if (typeof item === 'string') ownedItems.add(item.toUpperCase());
-                });
-
-                // Process Mastery (Aleca often puts mastered items here even if sold)
-                if (data.mastery) {
-                    Object.keys(data.mastery).forEach(k => ownedItems.add(k.toUpperCase()));
-                }
-
-                isDataLoaded = true;
-                
-                // Calculate missing stats for fun
-                Object.keys(DB_FRAMES).forEach(f => { if(!hasItem(f)) missingStats.frames++; });
-                Object.keys(DB_WEAPONS).forEach(w => { if(!hasItem(w)) missingStats.weapons++; });
-
-                const status = document.getElementById('fileStatus');
-                status.innerHTML = `✅ Analyzed. Missing: ${missingStats.frames} Key Frames, ${missingStats.weapons} Key Weapons.`;
-                status.style.color = "#2ea043";
-                
-            } catch (err) {
-                alert("JSON Error. Please check the file.");
-                console.error(err);
-            }
+            document.getElementById('fileStatus').innerText = "✅ Account Synced";
         };
-        reader.readAsText(file);
+        reader.readAsText(e.target.files[0]);
     });
 
-    function hasItem(name) {
-        return ownedItems.has(name) || ownedItems.has(name + " PRIME") || ownedItems.has(name + " VANDAL") || ownedItems.has(name + " WRAITH") || ownedItems.has("KUVA " + name) || ownedItems.has("TENET " + name);
-    }
-
-    // --- 2. GENERATOR LOGIC ---
-    async function generateProtocol() {
-        const btn = document.getElementById('rollBtn');
-        const card = document.getElementById('card');
-        
-        btn.disabled = true;
-        btn.innerText = "CALCULATING PRIORITIES...";
-        card.style.display = 'none';
-
+    function generateObjective() {
         let pool = [];
 
-        try {
-            // A. CHECK WARFRAMES (Weight 50)
-            if (isDataLoaded) {
-                for (const [name, data] of Object.entries(DB_FRAMES)) {
-                    if (!hasItem(name)) {
-                        pool.push({
-                            type: "PRIORITY: WARFRAME",
-                            name: `Farm ${name}`,
-                            loc: `${data.node} (${data.planet})`,
-                            reason: "Highest Priority. You do not own this frame.",
-                            tags: data.tags,
-                            styleClass: "type-warframe",
-                            weight: 50
-                        });
-                    }
-                }
-
-                // B. CHECK WEAPONS (Weight 20)
-                for (const [name, data] of Object.entries(DB_WEAPONS)) {
-                    if (!hasItem(name)) {
-                        pool.push({
-                            type: "PRIORITY: WEAPON",
-                            name: `Acquire ${name}`,
-                            loc: data.loc,
-                            reason: "Missing Weapon Mastery.",
-                            tags: [data.type, "Mastery"],
-                            styleClass: "type-weapon",
-                            weight: 20
-                        });
-                    }
-                }
-
-                // C. CHECK OTHERS (Weight 10)
-                for (const [name, data] of Object.entries(DB_OTHER)) {
-                    if (!hasItem(name)) {
-                        pool.push({
-                            type: "PRIORITY: SUPPORT",
-                            name: `Build ${name}`,
-                            loc: `${data.loc} (${data.planet})`,
-                            reason: "Missing Companion/Vehicle.",
-                            tags: ["Utility", "Mastery"],
-                            styleClass: "type-other",
-                            weight: 10
-                        });
-                    }
-                }
+        // 1. Check Frames (Highest Weight)
+        for (let f in DB.frames) {
+            const hasMastery = mastered.has(f);
+            const isSubsumed = subsumed.has(f);
+            if (!hasMastery) {
+                pool.push({ cat: "Warframe Mastery", name: f, loc: DB.frames[f], reason: "Missing Mastery Rank.", weight: 100 });
+            } else if (!isSubsumed && !f.includes("PRIME")) {
+                pool.push({ cat: "Helminth Subsume", name: f, loc: DB.frames[f], reason: "Mastered but not subsumed.", weight: 60 });
             }
-
-            // D. FETCH LIVE EVENTS (Weight 5-15) - Always run this as filler
-            const response = await fetch('https://api.warframestat.us/pc');
-            const ws = await response.json();
-
-            // Archon Hunt (Very High Value if active)
-            if (ws.archonHunt && !ws.archonHunt.expired) {
-                pool.push({
-                    type: "WEEKLY ELITE",
-                    name: "Archon Hunt",
-                    loc: ws.archonHunt.boss,
-                    reason: "Provides Archon Shard (Endgame Power).",
-                    tags: ["Weekly", "Shard"],
-                    styleClass: "type-warframe",
-                    weight: 30
-                });
-            }
-
-            // Fissures (The Backup Plan)
-            if (ws.fissures) {
-                ws.fissures.slice(0, 5).forEach(f => {
-                    pool.push({
-                        type: "RELIC CRACKING",
-                        name: `${f.tier} Fissure`,
-                        loc: `${f.node} (${f.missionType})`,
-                        reason: "Farm Prime Parts for missing Prime Mastery.",
-                        tags: ["Ducats", "Primes"],
-                        styleClass: "type-other",
-                        weight: 5
-                    });
-                });
-            }
-
-            // E. SELECT WINNER
-            if (pool.length === 0) {
-                 pool.push({
-                    type: "OPEN WORLD",
-                    name: "Bounties",
-                    loc: "Cetus / Fortuna",
-                    reason: "Fallback: Earn standing to buy Modular items (Zaws/Kitguns).",
-                    tags: ["Standing"],
-                    styleClass: "type-other",
-                    weight: 1
-                });
-            }
-
-            let weightedPool = [];
-            pool.forEach(p => {
-                for(let i=0; i < p.weight; i++) weightedPool.push(p);
-            });
-
-            const winner = weightedPool[Math.floor(Math.random() * weightedPool.length)];
-
-            // F. RENDER
-            document.getElementById('cHeader').innerText = winner.type;
-            document.getElementById('cHeader').className = "card-header " + winner.styleClass;
-            document.getElementById('cTarget').innerText = winner.name;
-            document.getElementById('cNode').innerText = winner.loc;
-            document.getElementById('cReason').innerText = winner.reason;
-            
-            document.getElementById('cTags').innerHTML = winner.tags.map(t => 
-                `<span class="tag">${t}</span>`
-            ).join('');
-
-            card.style.display = 'block';
-
-        } catch (err) {
-            console.error(err);
-            alert("Error connecting to Warframe Network.");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "CALCULATE NEXT OBJECTIVE";
         }
+
+        // 2. Check Weapons (Medium Weight)
+        for (let w in DB.weapons) {
+            if (!mastered.has(w) && !owned.has(w)) {
+                pool.push({ cat: "Weapon Mastery", name: w, loc: DB.weapons[w], reason: "Acquire for Mastery Rank points.", weight: 40 });
+            }
+        }
+
+        // 3. Check Syndicates (Low Weight)
+        for (let s in DB.syndicates) {
+            const rank = syndicateRanks[s] || 0;
+            if (rank < 5) {
+                pool.push({ cat: "Syndicate Standing", name: s, loc: DB.syndicates[s], reason: `Currently Rank ${rank}. Reach Rank 5 for rewards.`, weight: 10 });
+            }
+        }
+
+        // 4. Randomize
+        let weighted = [];
+        pool.forEach(p => { for(let i=0; i<p.weight; i++) weighted.push(p); });
+        
+        const win = weighted[Math.floor(Math.random() * weighted.length)];
+        if(!win) return alert("No objectives found! You are a God-Tier Tenno.");
+
+        document.getElementById('cCat').innerText = win.cat;
+        document.getElementById('cName').innerText = win.name;
+        document.getElementById('cLoc').innerText = win.loc;
+        document.getElementById('cReason').innerText = win.reason;
+        document.getElementById('result').style.display = 'block';
     }
 </script>
-
 </body>
 </html>
